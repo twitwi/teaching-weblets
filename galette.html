@@ -1,0 +1,115 @@
+<html lang="en" ng-app="galette">
+    <head>
+        <meta charset="utf-8">
+        <title>My HTML File</title>
+        <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+        <link rel="stylesheet" href="css/app.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script>
+    </head>
+    <body ng-controller="Galette">
+        
+        <input ng-model="nSlices" type="range" min="2" max="20" ng-change="update()"/>
+        <input ng-model="r" type="range" min="0.01" max="0.5" step="0.01" ng-change="update()"/>
+        <span ng-bind="probaOk"> </span>
+        
+        <svg width="800" height="600">
+            <defs>
+                <clipPath id="pieSlice">
+                    <path d="M 0 0
+                             L {{R}} 0
+                             A {{R}} {{R}} 0 0 1 {{R*cosD(360 / nSlices)}} {{R*sinD(360 / nSlices)}}
+                             Z"/>
+                </clipPath>
+                <clipPath id="pieSliceInner">
+                    <path d="M 0 0
+                             L {{R-r}} 0
+                             A {{R-r}} {{R-r}} 0 0 1 {{(R-r)*cosD(360 / nSlices)}} {{(R-r)*sinD(360 / nSlices)}}
+                             Z"/>
+                </clipPath>
+            </defs>
+            <g transform="scale({{scale}}) translate({{R}}, {{R}})" stroke-width="{{1/scale}}">
+                <g ng-repeat="a in angles" transform="rotate({{a}})">
+                    <path d="M 0 0
+                             L {{R}} 0
+                             A {{R}} {{R}} 0 0 1 {{R*cosD(360 / nSlices)}} {{R*sinD(360 / nSlices)}}
+                             Z" stroke="black" fill="#EEEEEE"/>
+                    <g clip-path="url(#pieSlice)" fill-opacity="0.4">
+                        <path d="M {{R-r}} 0
+                                 L {{R}} 0
+                                 A {{R}} {{R}} 0 0 1 {{R*cosD(360 / nSlices)}} {{R*sinD(360 / nSlices)}}
+                                 L {{(R-r)*cosD(360 / nSlices)}} {{(R-r)*sinD(360 / nSlices)}}
+                                 A {{R-r}} {{R-r}} 0 0 0 {{R-r}} {{0}}
+                                 Z" stroke="black" fill="blue"/>
+                    </g>
+                    <g clip-path="url(#pieSliceInner)" fill-opacity="0.4" >
+                        <rect x="{{nSlices > 2 ? -r : 0}}" y="{{-r}}" width="{{R+2*r}}" height="{{2*r}}" fill="red"/>
+                        <rect transform="rotate({{360 / nSlices}})"
+                              x="{{nSlices > 2 ? -r : 0}}" y="{{-r}}" width="{{R+2*r}}" height="{{2*r}}" fill="green"/>
+                    </g>
+                </g>
+            </g>
+        </svg>
+        <script>
+            angular
+                .module('galette', [])
+                .controller('Galette', ['$scope', function($scope) {
+                    $scope.nSlices = 8;
+                    $scope.scale = 300;
+                    $scope.R = 1;
+                    $scope.r = .1;
+                    $scope.angles = [];
+                    $scope.cosD = function(d) {return Math.cos(d/180*Math.PI);}
+                    $scope.sinD = function(d) {return Math.sin(d/180*Math.PI);}
+                    $scope.update = function() {
+                        $scope.angles.length = $scope.nSlices;
+                        for (var i = 0; i < $scope.nSlices; i++) {
+                            var v = i * 360.0 / $scope.nSlices;
+                            $scope.angles[i] = v;
+                        }
+                        /* // old
+                        $scope.z = (function(){
+                            var theta = 360.0 / $scope.nSlices;
+                            var y = $scope.r;
+                            var a = $scope.r / $scope.sinD(theta);
+                            var x = a * (1 + $scope.cosD(theta));
+                            return Math.sqrt(x*x + y*y);
+                        })();
+                        var rPossible = $scope.R - $scope.r;
+                        var rOk = $scope.R - $scope.r - $scope.z;
+                        if (rOk < 0) {
+                            $scope.probaOk = 0;
+                        } else {
+                            $scope.probaOk = rOk*rOk / (rPossible*rPossible);
+                        }
+                        /*/
+                        var theta = Math.PI * 2 / $scope.nSlices;
+                        var rPossible = $scope.R - $scope.r;
+                        var r = $scope.r;
+                        var a = $scope.r / Math.sin(theta);
+                        var x = a * (1 + Math.cos(theta));
+                        var beta = Math.asin(r / rPossible);
+                        var w = rPossible * Math.cos(beta);
+                        if (w < x) {
+                            $scope.probaOk = 0;                            
+                        } else {
+                            var areaKo = rPossible*rPossible*beta/2 + (w*r)/2 - (x*r)/2;
+                            areaKo *= 2;
+                            var areaTotal = rPossible*rPossible*theta/2;
+                            $scope.probaOk = (areaTotal - areaKo) / areaTotal;
+                        }
+                        $scope.geom = {
+                            x: x,
+                            y: r,
+                            a: a,
+                            beta: beta,
+                            theta: theta,
+                            w: w
+                        };
+                        //*/
+                        console.log($scope.probaOk);
+                    };
+                    $scope.update();
+                }]);
+        </script>
+    </body>
+</html>
