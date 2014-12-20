@@ -35,16 +35,19 @@
                 </clipPath>
             </defs>
             
-            <rect class="zoomSlice" x="{{R*scale}}" y="{{R*scale*(1-marginRatio*sinD(30))}}" width="{{R*scale*marginRatio}}" height="{{R*scale*marginRatio*sinD(30)}}" fill="red"/>
-            <rect class="zoomRhombus" x="{{R*scale}}" y="{{(R-marginRatio*r)*scale}}" width="{{geom.x*scale*marginRatio}}" height="{{r*scale*marginRatio}}" fill="red"/>
-
+            <rect class="zoomSlice" x="{{R*scale}}" y="{{R*scale*(1-marginRatio*sinD(30))}}" width="{{R*scale*marginRatio}}" height="{{R*scale*marginRatio*sinD(30)}}" fill="none"/>
+            <rect class="zoomRhombus" x="{{R*scale}}" y="{{(R-marginRatio*r)*scale}}" width="{{geom.x*scale*marginRatio}}" height="{{r*scale*marginRatio}}" fill="none"/>
+            
             <image xlink:href="http://2.bp.blogspot.com/_NmFLsOnnU1M/SW5b5Ym4h7I/AAAAAAAADEk/Un7QagXTS0U/s1600/galette.jpg"
-                   x="0" y="0" width="{{R*2*scale}}" height="{{R*2*scale}}"/>
-
-                        
+                   x="0" y="0" width="{{R*2*scale}}" height="{{R*2*scale}}" />
+            
+            
             <g transform="scale({{scale}}) translate({{R}}, {{R}}) scale(1, -1) scale({{marginRatio}})"
                stroke-width="{{2/scale}}"
                opacity="0.8">
+                
+                <circle class="galette" cx="0" cy="0" r="{{R}}" fill="#b47625" stroke="white"/>
+                
                 <g ng-repeat="a in angles" transform="rotate({{a}})" ng-class="{slice: true, first: $first}">
                     <path d="M 0 0
                              L {{R}} 0
@@ -63,38 +66,67 @@
                         <rect transform="rotate({{360 / nSlices}})"
                               x="{{nSlices > 2 ? -r : 0}}" y="{{-r}}" width="{{R+2*r}}" height="{{2*r}}" fill="green"/>
                     </g>
-                    <g class="iffirst" ng-if="$first">
-                        <g class="feve" transform="rotate({{360/nSlices/2}})"> 
-                            <circle cx="{{R-r}}" cy="0" r="{{r}}" fill="yellow" stroke="red" opacity="0.5"/>
-                            <g transform="translate({{R-r}}, 0)" notranrformadd=rotate({{-(.5+$index)*360/nSlices}})" opacity="0.75">
-                            <path d="M 0 {{-r}} L 0 {{r}} M {{-r}} 0 L {{r}} 0" stroke="white"/>
-                        </g>
+                </g>
+                
+                <g class="details">
+                    <g class="feve" transform="rotate({{360/nSlices/2}})"> 
+                        <circle cx="{{R-r}}" cy="0" r="{{r}}" fill="yellow" stroke="red"/>
+                        <g transform="translate({{R-r}}, 0)" notranrformadd=rotate({{-(.5+$index)*360/nSlices}})" opacity="0.75">
+                                                                                                                                <path d="M 0 {{-r}} L 0 {{r}} M {{-r}} 0 L {{r}} 0" stroke="white"/>
+                           </g>
+                           </g>
+                           <g class="split">
+                               <path d="M 0 0 L {{geom.x}} {{r}}" stroke="#333"/>
+                           </g>
+                           <g class="rectwr">
+                               <rect x="0" y="0" width="{{geom.w}}" height="{{r}}" stroke="black" fill="none"/>
+                               <text class="w" transform="translate({{geom.w/2}}, 0) scale({{1/scale}}) translate(0, -15) scale(1, -1)">w</text>
+                               <text class="r" transform="rotate(90) translate({{r/2}}, 0) scale({{1/scale}}) rotate(-90) translate(-15, -5) scale(1, -1)">r</text>
+                               <g class="x" stroke="white" fill="white">
+                                   <text stroke="none" class="x" transform="translate({{geom.x/2}}, {{r}}) scale({{1/scale}}) translate(-5, 8) scale(1,-1)">x</text>
+                                   <path fill="none" class="x" d="M 0 {{r+3/scale}} l {{geom.x}} 0""/>
+                               </g>
+                          </g>
+                           
+                           <g class="upperleft">
+                               <path d="M 0 0 L {{geom.x}} {{r}} L 0 {{r}} L 0 0" fill="red"/>
+                           </g>
+                           <g class="beta">
+                               <g class="angle">
+                                   <path stroke="black" d="M 0 0 L {{geom.w}} {{r}}"/>
+                                   <path stroke="black" fill="none" transform="scale(.5, .5)"
+                                         d="M {{R-r}} 0
+                                            A {{R-r}} {{R-r}} 1 0 1 {{geom.w}} {{r}}"/>
+                                   <text transform="rotate({{geom.beta/PI*180/2}}) translate({{(R-r)/2}}, 0) scale({{1/scale}}) translate(10, -4) scale(.9) scale(1,-1)">β</text>
+                               </g>
+                               <g class="area">
+                                   <path stroke="none" fill="black" opacity=".3"
+                                         d="M 0 0
+                                            L {{R-r}} 0
+                                            A {{R-r}} {{R-r}} 1 0 1 {{geom.w}} {{r}}
+                                            Z"/>
+                               </g>
+                           </g>
+                           </g>
+                           <g class="details">
+                               <g class="rhombus" stroke="yellow" fill="yellow">
+                                   <path class="shape" fill="none" d="M 0 0 L {{geom.a}} 0 L {{geom.x}} {{r}} L {{geom.a*cos(geom.theta)}} {{geom.a*sin(geom.theta)}} Z"/>
+                                   <text transform="translate({{geom.a/2}}, 0) scale({{1/scale}}) translate(-5, 5) scale(1,-1)">a</text>
+                                   <text transform="translate({{geom.a+(geom.x-geom.a)/2}}, {{r/2}}) scale({{1/scale}}) translate(-15, 0) scale(1,-1)">a</text>
+                                   
+                                   <path fill="none" d="M {{geom.x}} {{r}} l 0 {{-r}} L {{geom.a}} 0" stroke-dasharray="{{5/scale}}"/>
+                                   
+                                   <g class="x" stroke="white" fill="white">
+                                       <path fill="none" d="M 0 {{-3/scale}} l {{geom.x}} 0""/>
+                        <text transform="translate({{geom.x*2/3}}, 0) scale({{1/scale}}) translate(-10, -18) scale(1,-1)">x</text>
                     </g>
-                    <g class="rectwr">
-                        <rect x="0" y="0" width="{{geom.w}}" height="{{r}}" stroke="black" fill="none"/>
-                        <text class="w" transform="translate({{geom.w/2}}, 0) scale({{1/scale}}) translate(0, -15) scale(1, -1)">w</text>
-                        <text class="r" transform="rotate(90) translate({{r/2}}, 0) scale({{1/scale}}) rotate(-90) translate(-15, -5) scale(1, -1)">r</text>
-                    </g>
-                    <g class="split">
-                        <path d="M 0 0 L {{geom.x}} {{r}}" stroke="#333"/>
-                    </g>
-                    <g class="upperleft">
-                        <path d="M 0 0 L {{geom.x}} {{r}} L 0 {{r}} L 0 0" fill="red"/>
-                    </g>
-                    <g class="beta">
+                    
+                    <g class="theta" transform="translate({{geom.a}}, 0)">
                         <g class="angle">
-                            <path stroke="black" d="M 0 0 L {{geom.w}} {{r}}"/>
-                            <path stroke="black" fill="none" transform="scale(.5, .5)"
-                                  d="M {{R-r}} 0
-                                  A {{R-r}} {{R-r}} 1 0 1 {{geom.w}} {{r}}"/>
-                            <text transform="rotate({{geom.beta/PI*180/2}}) translate({{(R-r)/2}}, 0) scale({{1/scale}}) translate(10, -4) scale(.9) scale(1,-1)">β</text>
-                        </g>
-                        <g class="area">
-                            <path stroke="none" fill="black" opacity=".3"
-                                  d="M 0 0
-                                  L {{R-r}} 0
-                                  A {{R-r}} {{R-r}} 1 0 1 {{geom.w}} {{r}}
-                                  Z"/>
+                            <path fill="none"
+                                  d="M {{R/10}} 0
+                                     A {{R/10}} {{R/10}} 1 0 1 {{R/10 * cos(geom.theta)}} {{R/10 * sin(geom.theta)}}"/>
+                            <text transform="rotate({{geom.theta/PI*180/2}}) translate({{R/10}}, 0) scale({{1/scale}}) translate(10, -4) rotate({{-geom.theta/PI*180/2}})  scale(.9) scale(1,-1)">θ</text>
                         </g>
                     </g>
                 </g>
@@ -113,6 +145,8 @@
                     $scope.angles = [];
                     $scope.cosD = function(d) {return Math.cos(d/180*Math.PI);}
                     $scope.sinD = function(d) {return Math.sin(d/180*Math.PI);}
+                    $scope.cos = Math.cos;
+                    $scope.sin = Math.sin;
                     $scope.update = function() {
                         $scope.angles.length = $scope.nSlices;
                         for (var i = 0; i < $scope.nSlices; i++) {
