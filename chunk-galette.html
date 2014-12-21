@@ -88,7 +88,7 @@
                     </g>
                     <g class="rectwr">
                         <rect x="0" y="0" width="{{geom.w}}" height="{{r}}" stroke="black" fill="none" stroke-dasharray="{{3/scale}}"/>
-                        <text class="w" transform="translate({{geom.w/2}}, 0) scale({{1/scale}}) translate(0, -15) scale(1, -1)">w</text>
+                        <text class="w" transform="translate({{geom.w/2}}, {{r}}) scale({{1/scale}}) translate(0, 5) scale(1, -1)">w</text>
                         <text class="r" transform="rotate(90) translate({{r/2}}, 0) scale({{1/scale}}) rotate(-90) translate(-15, -5) scale(1, -1)">r</text>
                         <g class="x" stroke="white" fill="white">
                             <text stroke="none" class="x" transform="translate({{geom.x/2}}, {{r}}) scale({{1/scale}}) translate(-5, 8) scale(1,-1)">x</text>
@@ -122,6 +122,7 @@
                 <g class="details">
                     <g class="rhombus" stroke="yellow" fill="yellow">
                         <path class="shape" fill="none" d="M 0 0 L {{geom.a}} 0 L {{geom.x}} {{r}} L {{geom.a*cos(geom.theta)}} {{geom.a*sin(geom.theta)}} Z"/>
+                        <path class="height" fill="none" d="M {{geom.a*cos(geom.theta)}} {{r}} l 0 {{-r}}" stroke-dasharray="{{5/scale}}" stroke-width="{{1/scale}}"/>
                         <g class="a">
                         <text transform="translate({{geom.a/2}}, 0) scale({{1/scale}}) translate(-5, 5) scale(1,-1)">a</text>
                         <text transform="translate({{geom.a+(geom.x-geom.a)/2}}, {{r/2}}) scale({{1/scale}}) translate(-15, 0) scale(1,-1)">a</text>

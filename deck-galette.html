@@ -33,6 +33,12 @@
 
         <style>
             .deck-container {background: black; color: white;}
+            
+            .prevnext * {
+                border: 1px solid red;
+                background: black;
+            }
+            
             .thegalette {
                 position: absolute;
                 left:0;right:0;
@@ -81,10 +87,25 @@
          ></div>
     -->
     
-    <section class="slide">
-    </section>
+    <section class="smark">
+
+# <span class="var-title-br"></span> {*no-status title-slide} // commentaire
+- <span class="var-date"></span>
+- <span class="var-author"></span>
+- <span class="var-affiliation"></span>
+- Naviguez avec les flèches du clavier ou les bouton sur les cotés de la page
+
+# Le Problème de la Galette
+- Nous avons une galette
+- Elle contient une fève
+- Nous voulons la couper
+  - en $N$ parts égales
+  - sans toucher la fève
+- Quelle est la probabilité d'y arriver ?
     
+    </section>
     <section class="slide">
+        
         <div class="thegalette"
              ng-include="'chunk-galette.html'"
          ></div>
@@ -102,7 +123,7 @@
 - @anim: .feve1 +
 - $r$ : rayon de la fève (circulaire)
 - @anim: .border +
-- $R = R_G - r$ : rayon possible pour le centre de la fève
+- $R = R_G - r$
 - @anim: .feve2 | .blue | .feve3 | .green | -.feve
 - @anim: %+class:showthem:.thecontrols
 - @anim: %+class:foggy:.content
@@ -110,7 +131,7 @@
 - $\theta = \frac{360}{N}$
 - @anim: %-class:showthem:.thecontrols
 - @anim: %viewbox:svg .zoomRhombus
-- @anim: .rhombus .shape | .rhombus .a +
+- @anim: .rhombus .shape | .rhombus .a | .rhombus .height +
 - $\sin(\theta) = \frac{r}{a}  ; a = r / \sin(\theta)$
 - @anim: %+class:nothome:.rhombus .theta | .rhombus .dashed | .rhombus .x +
 - $x = a + a \cos(\theta)$
@@ -120,14 +141,14 @@
 - @anim: .area .beta .diag +
 - $R^2 = w^2 + r^2$
 - $w = \sqrt{R^2 - r^2}$
+- @anim: .tri +
+- $A_t = \frac{r w}{2} {}$ *et $A_h = \frac{r x}{2} {}$ {upperleft}*
+- @anim: .upperleft
 - @anim: .area .beta .angle +
 - $\sin(\beta) = r / R$ <br/>donc : $\beta = \arcsin(r/R)$
 - @anim: .area .beta .zone +
 - $A_b = \pi R^2 \cdot \beta / 360$
 - $A_p = \pi R^2 \cdot \theta / 360$ 
-- @anim: .tri +
-- $A_t = \frac{r w}{2} {}$ *et $A_h = \frac{r x}{2} {}$ {upperleft}*
-- @anim: .upperleft
 - $A = A\_b + A\_t - A\_h$
 - A = \pi R^2 \cdot \frac{\beta}{360} + \frac{r w}{2} - \frac{r x}{2} {latex}
 - p = (A\_p - 2 A) / A_p{latex}
@@ -142,34 +163,11 @@
 
 </section>
     </section>
-
-    <section class="smark">
-
-# <span class="var-title-br"></span> {*no-status title-slide} // commentaire
-- <span class="var-date"></span>
-- <span class="var-author"></span>
-- <span class="var-affiliation"></span>
-
-<!-- ######################################## -->
-# Questions/Commentaires? {no-print}
-
-## here
-- da
-- plop {g}
-- @anim: .g
-
-## Objectif Global du Cours {no-print}
-- Comprendre
-  - comment fonctionne l'ordinateur
-  - comment est créé un logiciel
-- Maîtriser
-  - les bases de la programmation impérative
-  - les bases des langages bash et python
-- &rArr; Vous convaincre !!! {re}
-- que vous pouvez apprendre à programmer {no}
-- que vous avez intérêt à savoir programmer {no}
-
-    </section>
+    
+    <div class="prevnext">
+        <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+        <a href="#" class="deck-next-link" title="Next">&#8594;</a>
+    </div>
     
 <!-- deck.status snippet -->
 <p class="deck-status deck-progress-10"> <span class="deck-status-current"></span> / <span class="deck-status-total"></span> − <span class="var-author">will be replaced by the author</span> − <span class="var-title">will be replaced by the title</span></p>
