@@ -1,0 +1,148 @@
+        <svg width="1000" height="1000" viewBox="0 0 1000 1000"
+             xmlns:xlink= "http://www.w3.org/1999/xlink">
+            <defs>
+                <clipPath id="pieSlice">
+                    <path d="M 0 0
+                             L {{R}} 0
+                             A {{R}} {{R}} 0 0 1 {{R*cosD(360 / nSlices)}} {{R*sinD(360 / nSlices)}}
+                             Z"/>
+                </clipPath>
+                <clipPath id="pieSliceInner">
+                    <path d="M 0 0
+                             L {{R-r}} 0
+                             A {{R-r}} {{R-r}} 0 0 1 {{(R-r)*cosD(360 / nSlices)}} {{(R-r)*sinD(360 / nSlices)}}
+                             Z"/>
+                </clipPath>
+            </defs>
+            
+            <rect class="zoomAll"
+                  x="0" y="{{0}}"
+                  width="{{2*R*scale}}" height="{{2*R*scale}}" fill="none"/>
+            <rect class="zoomSlice"
+                  x="{{R*scale-20}}" y="{{R*scale*(1-marginRatio*sinD(30))}}"
+                  width="{{(R*scale+40)*marginRatio}}" height="{{R*scale*marginRatio*sinD(30)}}" fill="none"/>
+            <rect class="zoomRhombus"
+                  x="{{(R-r/5)*scale}}" y="{{(R-marginRatio*r)*scale}}"
+                  width="{{(2*r/5+max(geom.a + r/2, geom.x))*marginRatio*scale}}" height="{{r*scale*marginRatio}}" fill="none"/>
+            
+            <image xlink:href="http://2.bp.blogspot.com/_NmFLsOnnU1M/SW5b5Ym4h7I/AAAAAAAADEk/Un7QagXTS0U/s1600/galette.jpg"
+                   x="0" y="0"
+                   width="1000"
+                   height="1000"
+                   preserveAspectRatio="none"/>
+            
+            
+            <g transform="scale({{scale}}) translate({{R}}, {{R}}) scale(1, -1) scale({{marginRatio}})"
+               stroke-width="{{2/scale}}"
+               class="content">
+                
+                <g class="brown">
+                <circle class="brown" cx="0" cy="0" r="{{R}}" fill="#b47625" stroke="white"/>
+                </g>
+                
+                <g class="slices">
+                <g ng-repeat="a in angles" transform="rotate({{a}})"
+                   ng-class="{slice: true, first: $first}">
+                    <path class="cuts"
+                          d="M 0 0
+                             L {{R}} 0
+                             A {{R}} {{R}} 0 0 1 {{R*cosD(360 / nSlices)}} {{R*sinD(360 / nSlices)}}
+                             Z" stroke="black" fill="none"/>
+                    <g class="border" clip-path="url(#pieSlice)" fill-opacity="0.4">
+                        <path d="M {{R-r}} 0
+                                 L {{R}} 0
+                                 A {{R}} {{R}} 0 0 1 {{R*cosD(360 / nSlices)}} {{R*sinD(360 / nSlices)}}
+                                 L {{(R-r)*cosD(360 / nSlices)}} {{(R-r)*sinD(360 / nSlices)}}
+                                 A {{R-r}} {{R-r}} 0 0 0 {{R-r}} {{0}}
+                                 Z" stroke="black" fill="red"/>
+                    </g>
+                    <g clip-path="url(#pieSliceInner)" fill-opacity="0.4" >
+                        <rect x="{{nSlices > 2 ? -r : 0}}" y="{{-r}}" width="{{R+2*r}}" height="{{2*r}}" fill="blue" class="blue"/>
+                        <rect transform="rotate({{360 / nSlices}})"
+                              x="{{nSlices > 2 ? -r : 0}}" y="{{-r}}" width="{{R+2*r}}" height="{{2*r}}" fill="green" class="green"/>
+                    </g>
+                </g>
+                </g>
+                
+                <g class="details">
+                    <g class="feve feve1" transform="rotate({{360/nSlices/2}}) translate({{R-r}}, 0)">
+                        <circle cx="0" cy="0" r="{{r}}" fill="yellow" stroke="red"/>
+                        <path d="M 0 {{-r}} L 0 {{r}} M {{-r}} 0 L {{r}} 0" stroke="white"/>
+                        <path d="M 0 {{-5/scale}} L 0 {{5/scale}} M {{-5/scale}} 0 L {{5/scale}} 0" stroke="black"/>
+                    </g>
+                    <g class="feve feve2" transform="translate({{R/2}}, {{r}})">
+                        <circle cx="0" cy="0" r="{{r}}" fill="yellow" stroke="red"/>
+                        <path d="M 0 {{-r}} L 0 {{r}} M {{-r}} 0 L {{r}} 0" stroke="white"/>
+                        <path d="M 0 {{-5/scale}} L 0 {{5/scale}} M {{-5/scale}} 0 L {{5/scale}} 0" stroke="black"/>
+                    </g>
+                    <g class="feve feve3" transform="rotate({{360/nSlices}}) translate({{R/2}}, {{-r}})">
+                        <circle cx="0" cy="0" r="{{r}}" fill="yellow" stroke="red"/>
+                        <path d="M 0 {{-r}} L 0 {{r}} M {{-r}} 0 L {{r}} 0" stroke="white"/>
+                        <path d="M 0 {{-5/scale}} L 0 {{5/scale}} M {{-5/scale}} 0 L {{5/scale}} 0" stroke="black"/>
+                    </g>
+                </g>
+                <g class="details area">
+                    
+                    <g class="split">
+                        <path d="M 0 0 L {{geom.x}} {{r}}" stroke="#333"/>
+                    </g>
+                    <g class="rectwr">
+                        <rect x="0" y="0" width="{{geom.w}}" height="{{r}}" stroke="black" fill="none" stroke-dasharray="{{3/scale}}"/>
+                        <text class="w" transform="translate({{geom.w/2}}, 0) scale({{1/scale}}) translate(0, -15) scale(1, -1)">w</text>
+                        <text class="r" transform="rotate(90) translate({{r/2}}, 0) scale({{1/scale}}) rotate(-90) translate(-15, -5) scale(1, -1)">r</text>
+                        <g class="x" stroke="white" fill="white">
+                            <text stroke="none" class="x" transform="translate({{geom.x/2}}, {{r}}) scale({{1/scale}}) translate(-5, 8) scale(1,-1)">x</text>
+                            <path fill="none" class="x" d="M 0 {{r+3/scale}} l {{geom.x}} 0"/>
+                        </g>
+                    </g>
+                    
+                    <g class="tri">
+                        <path d="M 0 0 l 0 {{r}} l {{geom.w}} 0 z" fill="white" opacity="0.5"/>
+                    </g>
+                    <g class="upperleft">
+                        <path d="M 0 0 L {{geom.x}} {{r}} L 0 {{r}} L 0 0" fill="black" opacity="0.5"/>
+                    </g>
+                    <g class="beta">
+                        <path class="diag" stroke="black" d="M 0 0 L {{geom.w}} {{r}}"/>
+                        <g class="angle">
+                            <path stroke="black" fill="none" transform="scale(.5, .5)"
+                                  d="M {{R-r}} 0
+                                     A {{R-r}} {{R-r}} 1 0 1 {{geom.w}} {{r}}"/>
+                            <text transform="rotate({{geom.beta/PI*180/2}}) translate({{(R-r)/2}}, 0) scale({{1/scale}}) translate(10, -4) scale(.9) scale(1,-1)">β</text>
+                        </g>
+                        <g class="zone">
+                            <path stroke="none" fill="white" opacity=".5"
+                                  d="M 0 0
+                                     L {{R-r}} 0
+                                     A {{R-r}} {{R-r}} 1 0 1 {{geom.w}} {{r}}
+                                     Z"/>
+                        </g>
+                    </g>
+                </g>
+                <g class="details">
+                    <g class="rhombus" stroke="yellow" fill="yellow">
+                        <path class="shape" fill="none" d="M 0 0 L {{geom.a}} 0 L {{geom.x}} {{r}} L {{geom.a*cos(geom.theta)}} {{geom.a*sin(geom.theta)}} Z"/>
+                        <g class="a">
+                        <text transform="translate({{geom.a/2}}, 0) scale({{1/scale}}) translate(-5, 5) scale(1,-1)">a</text>
+                        <text transform="translate({{geom.a+(geom.x-geom.a)/2}}, {{r/2}}) scale({{1/scale}}) translate(-15, 0) scale(1,-1)">a</text>
+                        </g>
+                        
+                        <path class="dashed" fill="none" d="M {{geom.x}} {{r}} l 0 {{-r}} L {{geom.a}} 0" stroke-dasharray="{{5/scale}}" stroke-width="{{1/scale}}"/>
+                        
+                        <g class="x" stroke="white" fill="white">
+                            <path fill="none" d="M 0 {{-3/scale}} l {{geom.x}} 0"/>
+                            <text transform="translate({{geom.x*2/3}}, 0) scale({{1/scale}}) translate(-10, -18) scale(1,-1)">x</text>
+                        </g>
+                        
+                        <g class="theta" transform="translate({{geom.a}}, 0)">
+                            <g class="angle">
+                                <path fill="none"
+                                      d="M {{R/10}} 0
+                                         A {{R/10}} {{R/10}} 1 0 1 {{R/10 * cos(geom.theta)}} {{R/10 * sin(geom.theta)}}"/>
+                                <text transform="rotate({{geom.theta/PI*180/2}}) translate({{R/10}}, 0) scale({{1/scale}}) translate(10, -4) rotate({{-geom.theta/PI*180/2}})  scale(.9) scale(1,-1)">θ</text>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </svg>
