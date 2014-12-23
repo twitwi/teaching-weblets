@@ -37,7 +37,13 @@
                class="content">
                 
                 <g class="brown">
-                <circle class="brown" cx="0" cy="0" r="{{R}}" fill="#b47625" stroke="white"/>
+                    <circle class="brown" cx="0" cy="0" r="{{R}}" fill="#b47625" stroke="white"/>
+                    <path class="" d="M 0 0 L {{-R}} 0" stroke="black" stroke-dasharray="{{10/scale}}"/>
+                    <text class="Rg" transform="translate({{-R/2}}, 0) scale({{2/scale}}) translate(0, 5) scale(1, -1)">R<tspan style="font-size:65%;baseline-shift:sub">G</tspan></text>
+                </g>
+                <g class="R">
+                    <path class="" d="M 0 {{-5/scale}} l {{-R+r}} 0" stroke="black" stroke-dasharray="{{7/scale}}"/>
+                    <text class="R" transform="translate({{-R/2}}, 0) scale({{2/scale}}) translate(0, -17) scale(1, -1)">R</text>
                 </g>
                 
                 <g class="slices">
