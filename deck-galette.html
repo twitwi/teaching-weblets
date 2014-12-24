@@ -11,7 +11,8 @@
         <meta name="date" content="2015">
         <meta name="affiliation" content="Université Jean Monnet − Laboratoire Hubert Curien">
  
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script>
+        <!--script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script-->
+        <script src="angular.js"></script>
         <script src="galette.js"></script>
         <style type="text/css">
         </style>
@@ -20,7 +21,6 @@
         <script>
             includedeck([
                         ], {
-                         selectors: { codemirroritem: ".code code, .code textarea" }, codemirror: { mode: "python" },
                          AFTERSMARKDOWN: function() {
                              $(".slide.libyli li:not(li li):not(.notslide)").addClass("slide");
                              $("li.libyli>ul>li:not(.notslide)").addClass("slide");
@@ -155,13 +155,9 @@
 - @anim: %+class:showthem:.thecontrols
 - @anim: %dur:1000 + %viewbox:.zoomAll
 
-# <span class="var-title-br"></span> {*no-status title-slide} // commentaire
-- <span class="var-date"></span>
-- <span class="var-author"></span>
-- <span class="var-affiliation"></span>
-
 
 </section>
+
     </section>
     
     <div class="prevnext">
