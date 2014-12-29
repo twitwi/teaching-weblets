@@ -4,7 +4,7 @@ angular
         $scope.nSlices = 9;
         $scope.scale = 500;
         $scope.R = 1;
-        $scope.r = .1;
+        $scope.r = 3/25;
         $scope.PI = Math.PI;
         $scope.marginRatio = 0.92;
         $scope.angles = [];

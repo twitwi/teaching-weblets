@@ -50,9 +50,10 @@
             
             .thecontrols {
                 position: absolute;
+                background: rgba(0,0,0, 0.5);
                 left: 200px;
                 top: 0;
-                width: 600px;
+                width: auto;
                 height: auto;
                 display: none;
             }
@@ -71,6 +72,38 @@
 
             li.no {list-style: none;}
             ul ul {margin-bottom: .3em;}
+
+            .deck-container li.deck-current {
+                background: #200;
+                border: 2px solid red;
+                padding: 5px;
+                position: absolute;
+                left: 200px;
+                top: 100px;
+                padding: 10px;
+                list-style: none;
+                font-size: 2em;
+            }
+            li {
+                list-style: square;
+            }
+            .comment {
+                margin-left: 1em !important;
+                color: yellow !important;
+                background: rgba(0,0,0,0.8) !important;
+            }
+            .deck-container li.deck-current .comment {
+                display: inline !important;
+            }
+            li:hover:not(.deck-current) .comment {
+                display: block !important;
+                position: absolute;
+                z-index: 1;
+            }
+            li.params {
+                display: inline-block;
+                margin-right: 2em;
+            }
         </style>
     </head>
 
@@ -137,41 +170,41 @@
 
 # Galette des rois {libyli}
 - @anim: g.brown +
-- $R_G$ : rayon de la galette
+- $R_G$ {params} // rayon de la galette
 - @anim: .slices +
-- $N$: nombres de parts
+- $N$ {params} // nombres de parts
 - @anim: .feve1 +
-- $r$ : rayon de la fève (circulaire)
+- $r$ {params} // rayon de la fève (circulaire)
 - @anim: .border + .R +
-- $R = R_G - r$
+- $R = R_G - r$ // rayon possible pour le centre de la fève
 - @anim: .feve2 | .blue | .feve3 | .green | -.feve
 - @anim: %+class:showthem:.thecontrols
 - @anim: %+class:foggy:.content
 - @anim: .rhombus .theta +
-- $\theta = \frac{360}{N}$
+- $\theta = \frac{360}{N}$ // angle d'une part
 - @anim: %-class:showthem:.thecontrols
 - @anim: %viewbox:svg .zoomRhombus
 - @anim: .rhombus .shape | .rhombus .a | .rhombus .height +
-- $\sin(\theta) = \frac{r}{a}  ; a = r / \sin(\theta)$
+- $\sin(\theta) = \frac{r}{a}  ; a = r / \sin(\theta)$ // coté du losange
 - @anim: %+class:nothome:.rhombus .theta | .rhombus .dashed | .rhombus .x +
-- $x = a + a \cos(\theta)$
+- $x = a + a \cos(\theta)$ // position horizontale du sommet du losange
 - @anim: %viewbox:svg .zoomSlice | -.rhombus
 - @anim: .area .split | .rectwr | .rectwr .r, .rectwr .x | .rectwr .w +
-- $w$ : largeur du rectangle
+- $w$ // largeur du rectangle
 - @anim: .area .beta .diag +
-- $R^2 = w^2 + r^2$
-- $w = \sqrt{R^2 - r^2}$
+- $R^2 = w^2 + r^2$ // diagonale du rectangle (Pythagore)
+- $w = \sqrt{R^2 - r^2}$ // largeur du rectangle
 - @anim: .tri +
-- $A_t = \frac{r w}{2} {}$ *et $A_h = \frac{r x}{2} {}$ {upperleft}*
+- $A_t = \frac{r w}{2} {}$ *et $A_h = \frac{r x}{2} {}$* // surfaces des rectangles supérieurs
 - @anim: .upperleft
 - @anim: .area .beta .angle +
-- $\sin(\beta) = r / R$ <br/>donc : $\beta = \arcsin(r/R)$
+- $\sin(\beta) = r / R$ <br/>donc : $\beta = \arcsin(r/R)$ // angle de la part bleue
 - @anim: .area .beta .zone +
-- $A_b = \pi R^2 \cdot \beta / 360$
-- $A_p = \pi R^2 \cdot \theta / 360$ 
-- $A = A\_b + A\_t - A\_h$
-- A = \pi R^2 \cdot \frac{\beta}{360} + \frac{r w}{2} - \frac{r x}{2} {latex}
-- p = (A\_p - 2 A) / A_p{latex}
+- $A_b = \pi R^2 \cdot \beta / 360$ // surface de la part d'angle $\beta$
+- $A_p = \pi R^2 \cdot \theta / 360$ // surface de la part possible (angle $\theta$)
+- $A = A\_b + A\_t - A\_h$ // surface de la zone blanche
+- $A = \pi R^2 \cdot \frac{\beta}{360} + \frac{r w}{2} - \frac{r x}{2} {}$ // ... développée
+- $p = (A\_p - 2 A) / A_p {}$  // probabilité de ne pas couper la fève
 - @anim: %+class:showthem:.thecontrols
 - @anim: %dur:1000 + %viewbox:.zoomAll
 

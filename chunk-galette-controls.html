@@ -1,5 +1,6 @@
-<input ng-model="$parent.nSlices" type="range" min="2" max="20" ng-change="update()"/> {{nSlices}} <br/>
-<input ng-model="$parent.r" type="range" min="0.01" max="0.5" step="0.01" ng-change="update()"/> {{r}} <br/>
-<input ng-model="$parent.marginRatio" type="range" min="0.7" max="1" step="0.01"/> <br/>
-<span ng-bind="probaOk"> </span>
+N = {{nSlices}} <input ng-model="$parent.nSlices" type="range" min="2" max="20" ng-change="update()"/> <br/>
+R = 25 <br/>
+r = {{(r*25).toFixed(2)}} <input ng-model="$parent.r" type="range" min="0.01" max="0.5" step="0.002" ng-change="update()"/> <br/>
+<!--input ng-model="$parent.marginRatio" type="range" min="0.7" max="1" step="0.01"/> <br/-->
+p = <span ng-bind="probaOk"> </span>
 

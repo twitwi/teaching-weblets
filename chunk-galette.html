@@ -130,7 +130,7 @@
                         <path class="shape" fill="none" d="M 0 0 L {{geom.a}} 0 L {{geom.x}} {{r}} L {{geom.a*cos(geom.theta)}} {{geom.a*sin(geom.theta)}} Z"/>
                         <path class="height" fill="none" d="M {{geom.a*cos(geom.theta)}} {{r}} l 0 {{-r}}" stroke-dasharray="{{5/scale}}" stroke-width="{{1/scale}}"/>
                         <g class="a">
-                        <text transform="translate({{geom.a/2}}, 0) scale({{1/scale}}) translate(-5, 5) scale(1,-1)">a</text>
+                        <text transform="translate({{geom.a/2}}, 0) scale({{1/scale}}) translate(5, 5) scale(1,-1)">a</text>
                         <text transform="translate({{geom.a+(geom.x-geom.a)/2}}, {{r/2}}) scale({{1/scale}}) translate(-15, 0) scale(1,-1)">a</text>
                         </g>
                         
@@ -146,7 +146,7 @@
                                 <path fill="none"
                                       d="M {{R/10}} 0
                                          A {{R/10}} {{R/10}} 1 0 1 {{R/10 * cos(geom.theta)}} {{R/10 * sin(geom.theta)}}"/>
-                                <text transform="rotate({{geom.theta/PI*180/2}}) translate({{R/10}}, 0) scale({{1/scale}}) translate(10, -4) rotate({{-geom.theta/PI*180/2}})  scale(.9) scale(1,-1)">θ</text>
+                                <text transform="rotate({{geom.theta/PI*180/2}}) translate({{R/10}}, 0) scale({{1/scale}}) translate(5, -4) rotate({{-geom.theta/PI*180/2}})  scale(2) scale(1,-1)">θ</text>
                             </g>
                         </g>
                     </g>
