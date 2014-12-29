@@ -31,6 +31,8 @@
                         }
             );
         </script>
+        <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
 
         <style>
             .deck-container {background: black; color: white;}
@@ -82,10 +84,14 @@
                 top: 100px;
                 padding: 10px;
                 list-style: none;
-                font-size: 2em;
+                font-size: 1.8em;
             }
             li {
                 list-style: square;
+                margin-top: .25em;
+            }
+            li * {
+                background: black;
             }
             .comment {
                 margin-left: 1em !important;
@@ -172,7 +178,7 @@
 - @anim: %-class:showthem:.thecontrols
 - @anim: %viewbox:svg .zoomRhombus
 - @anim: .rhombus .shape | .rhombus .a | .rhombus .height +
-- $\sin(\theta) = \frac{r}{a}  ; a = r / \sin(\theta)$ // side of the rhombus
+- $\sin(\theta) = \frac{r}{a}$ <br/> $a = \frac{r}{\sin(\theta)}$ // side of the rhombus
 - @anim: %+class:nothome:.rhombus .theta | .rhombus .dashed | .rhombus .x +
 - $x = a + a \cos(\theta)$ // horizontal position of the rhombus corner
 - @anim: %viewbox:svg .zoomSlice | -.rhombus
