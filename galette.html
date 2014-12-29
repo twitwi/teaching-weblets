@@ -1,17 +1,174 @@
-<html lang="en" ng-app="galette">
+<!DOCTYPE html>
+<html ng-app="galette" ng-controller="Galette">
     <head>
         <meta charset="utf-8">
-        <title>My Galette</title>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+            
+        <title>Galette des rois</title>
+
+        <meta name="author" content="Rémi Emonet">
+        <meta name="venue" content="Teaching Weblets">
+        <meta name="date" content="2015">
+        <meta name="affiliation" content="Université Jean Monnet − Laboratoire Hubert Curien">
+ 
+        <!--script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script-->
+        <script src="angular.js"></script>
         <script src="galette.js"></script>
+        <style type="text/css">
+        </style>
+
+	<script src="deck.js-packed/deck-packed.js"></script>
+        <script>
+            includedeck([
+                        ], {
+                         AFTERSMARKDOWN: function() {
+                             $(".slide.libyli li:not(li li):not(.notslide)").addClass("slide");
+                             $("li.libyli>ul>li:not(.notslide)").addClass("slide");
+                             $(".slide").each(function() {if ($(this).css('display') == 'none') $(this).removeClass("slide")});
+                             $("#plan").detach();
+                         }
+                        }
+            );
+        </script>
+
         <style>
-            .feve {opacity: 0.3;}
-            .slice:not(.first) {opacity: 0.3;}
-            .hid {visibility: hidden;}
+            .deck-container {background: black; color: white;}
+            
+            .prevnext * {
+                border: 1px solid red;
+                background: black;
+            }
+            
+            .thegalette {
+                position: absolute;
+                left:0;right:0;
+                width:1000px; height: 1000px;
+                transform: translate(200px, 0px) translate(-50%, -50%) scale(0.6) translate(50%, 50%);
+            }
+            .deck-container>.slide>section {max-width: 200px;}
+            
+            .thecontrols {
+                position: absolute;
+                left: 200px;
+                top: 0;
+                width: 600px;
+                height: auto;
+                display: none;
+            }
+            .thecontrols.showthem {display: block;}
+            
+            circle.brown {opacity: .65;}
+            
+            .slice {transition: opacity 400ms; opacity: 1;}
+            .foggy .slice:not(.first) {opacity: .25;}
+            
+            .rhombus .theta {transform: translate(0, 0); transition: transform 1s;}
+            .rhombus .theta.nothome {transform: translate({{geom.a}}px,0);}
+            
+            section {font-size: 90%;}
+            ul {margin-left: 0;}
         </style>
     </head>
-    <body ng-controller="Galette">
-        <div ng-include="'chunk-galette-controls.html'"></div>
-        <div ng-include="'chunk-galette.html'"></div>
-    </body>
+
+<body>
+
+<div class="deck-container">
+
+    <div class="deck-loading-splash" style="background: black; color: #F87;">
+        <span class="vcenter" style="font-size: 30px; font-family: Arial; ">Please wait, while our marmots are preparing the hot chocolate…</span>
+    </div>
+
+
+    <!--
+    <div class="thegalette g"
+         ng-controller="Galette" ng-include="'chunk-galette.html'"
+         nodata-progress="left: slide.left ; width: slide.right - slide.left ; top: slide.top ; height: slide.bottom - slide.top"
+         data-progress="transform: 'translate(-50%, -50%) translate('+slide.left+'px,'+slide.top+'px) scale('+600/1000*designRatio+') translate(50%, 50%)'"
+         ></div>
+    -->
+    
+    <section class="smark">
+
+# <span class="var-title-br"></span> {*no-status title-slide} // commentaire
+- <span class="var-date"></span>
+- <span class="var-author"></span>
+- <span class="var-affiliation"></span>
+- Naviguez avec les flèches du clavier ou les bouton sur les cotés de la page
+
+# Le Problème de la Galette
+- Nous avons une galette
+- Elle contient une fève
+- Nous voulons la couper
+  - en $N$ parts égales
+  - sans toucher la fève
+- Quelle est la probabilité d'y arriver ?
+    
+    </section>
+    <section class="slide">
+        
+        <div class="thegalette"
+             ng-include="'chunk-galette.html'"
+         ></div>
+        <div class="thecontrols"
+             ng-include="'chunk-galette-controls.html'"
+         ></div>
+        
+        <section class="smark">
+
+# Galette des rois {libyli}
+- @anim: g.brown +
+- $R_G$ : rayon de la galette
+- @anim: .slices +
+- $N$: nombres de parts
+- @anim: .feve1 +
+- $r$ : rayon de la fève (circulaire)
+- @anim: .border + .R +
+- $R = R_G - r$
+- @anim: .feve2 | .blue | .feve3 | .green | -.feve
+- @anim: %+class:showthem:.thecontrols
+- @anim: %+class:foggy:.content
+- @anim: .rhombus .theta +
+- $\theta = \frac{360}{N}$
+- @anim: %-class:showthem:.thecontrols
+- @anim: %viewbox:svg .zoomRhombus
+- @anim: .rhombus .shape | .rhombus .a | .rhombus .height +
+- $\sin(\theta) = \frac{r}{a}  ; a = r / \sin(\theta)$
+- @anim: %+class:nothome:.rhombus .theta | .rhombus .dashed | .rhombus .x +
+- $x = a + a \cos(\theta)$
+- @anim: %viewbox:svg .zoomSlice | -.rhombus
+- @anim: .area .split | .rectwr | .rectwr .r, .rectwr .x | .rectwr .w +
+- $w$ : largeur du rectangle
+- @anim: .area .beta .diag +
+- $R^2 = w^2 + r^2$
+- $w = \sqrt{R^2 - r^2}$
+- @anim: .tri +
+- $A_t = \frac{r w}{2} {}$ *et $A_h = \frac{r x}{2} {}$ {upperleft}*
+- @anim: .upperleft
+- @anim: .area .beta .angle +
+- $\sin(\beta) = r / R$ <br/>donc : $\beta = \arcsin(r/R)$
+- @anim: .area .beta .zone +
+- $A_b = \pi R^2 \cdot \beta / 360$
+- $A_p = \pi R^2 \cdot \theta / 360$ 
+- $A = A\_b + A\_t - A\_h$
+- A = \pi R^2 \cdot \frac{\beta}{360} + \frac{r w}{2} - \frac{r x}{2} {latex}
+- p = (A\_p - 2 A) / A_p{latex}
+- @anim: %+class:showthem:.thecontrols
+- @anim: %dur:1000 + %viewbox:.zoomAll
+
+
+</section>
+
+    </section>
+    
+    <div class="prevnext">
+        <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+        <a href="#" class="deck-next-link" title="Next">&#8594;</a>
+    </div>
+    
+<!-- deck.status snippet -->
+<p class="deck-status deck-progress-10"> <span class="deck-status-current"></span> / <span class="deck-status-total"></span> − <span class="var-author">will be replaced by the author</span> − <span class="var-title">will be replaced by the title</span></p>
+<a data-progress-size=": spe.top(15, 555); height: 45*designRatio; left: slide.right - 90*designRatio; width: 90*designRatio" class="ccby" href="http://en.wikipedia.org/wiki/Creative_Commons_license" title="This work is under CC-BY licence." target="_blank"></a>
+
+</div>
+</body>
 </html>
