@@ -1,0 +1,38 @@
+digraph G {
+        
+        RG -> R
+        r -> R
+        
+        N -> theta
+        
+        r -> a
+        theta -> a
+
+        a -> x
+        theta -> x
+        
+        R -> w
+        r -> w
+
+        r -> At
+        w -> At
+
+        r -> Ah
+        x -> Ah
+        
+        r -> beta
+        R -> beta
+
+        R -> Ab
+        beta -> Ab
+
+        R -> Ap
+        theta -> Ap
+
+        Ab -> A
+        At -> A
+        Ah -> A
+
+        Ap -> p
+        A -> p
+}

@@ -1,3 +1,3 @@
 [submodule "deck.js-packed"]
-	path = deck.js-packed
+	path = galette/deck.js-packed
 	url = https://github.com/twitwi/deck.js-packed.git

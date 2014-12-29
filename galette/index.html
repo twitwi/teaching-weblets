@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html ng-app="galette" ng-controller="Galette">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+            
+        <title>The King's Cake (Galette)</title>
+
+        <meta name="author" content="Rémi Emonet">
+        <meta name="venue" content="Teaching Weblets">
+        <meta name="date" content="2015">
+        <meta name="affiliation" content="Université Jean Monnet − Laboratoire Hubert Curien">
+ 
+        <!--script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js"></script-->
+        <script src="angular.js"></script>
+        <script>window.angular || document.write('<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.js">\x3C/script>')</script>
+        <script src="galette.js"></script>
+        <style type="text/css">
+        </style>
+
+	<script src="deck.js-packed/deck-packed.js"></script>
+        <script>
+            includedeck([
+                        ], {
+                         AFTERSMARKDOWN: function() {
+                             $(".slide.libyli li:not(li li):not(.notslide)").addClass("slide");
+                             $("li.libyli>ul>li:not(.notslide)").addClass("slide");
+                             $(".slide").each(function() {if ($(this).css('display') == 'none') $(this).removeClass("slide")});
+                             $("#plan").detach();
+                         }
+                        }
+            );
+        </script>
+
+        <style>
+            .deck-container {background: black; color: white;}
+            
+            .prevnext * {
+                border: 1px solid red;
+                background: black;
+            }
+            
+            .thegalette {
+                position: absolute;
+                left:0;right:0;
+                width:1000px; height: 1000px;
+                transform: translate(200px, 0px) translate(-50%, -50%) scale(0.6) translate(50%, 50%);
+            }
+            .deck-container>.slide>section {max-width: 200px;}
+            
+            .thecontrols {
+                position: absolute;
+                background: rgba(0,0,0, 0.5);
+                left: 200px;
+                top: 0;
+                width: auto;
+                height: auto;
+                display: none;
+            }
+            .thecontrols.showthem {display: block;}
+            
+            circle.brown {opacity: .65;}
+            
+            .slice {transition: opacity 400ms; opacity: 1;}
+            .foggy .slice:not(.first) {opacity: .25;}
+            
+            .rhombus .theta {transform: translate(0, 0); transition: transform 1s;}
+            .rhombus .theta.nothome {transform: translate({{geom.a}}px,0);}
+            
+            section {font-size: 90%;}
+            ul {margin-left: 0;}
+
+            li.no {list-style: none;}
+            ul ul {margin-bottom: .3em;}
+
+            .deck-container li.deck-current {
+                background: #200;
+                border: 2px solid red;
+                padding: 5px;
+                position: absolute;
+                left: 210px;
+                top: 100px;
+                padding: 10px;
+                list-style: none;
+                font-size: 2em;
+            }
+            li {
+                list-style: square;
+            }
+            .comment {
+                margin-left: 1em !important;
+                color: yellow !important;
+                background: rgba(0,0,0,0.8) !important;
+            }
+            .deck-container li.deck-current .comment {
+                display: inline !important;
+            }
+            li:hover:not(.deck-current) .comment {
+                display: block !important;
+                position: absolute;
+                z-index: 1;
+            }
+            li.params {
+                display: inline-block;
+                margin-right: 2em;
+            }
+        </style>
+    </head>
+
+<body>
+
+<div class="deck-container">
+
+    <div class="deck-loading-splash" style="background: black; color: #F87;">
+        <span class="vcenter" style="font-size: 30px; font-family: Arial; ">Please wait, while our marmots are preparing the hot chocolate…</span>
+    </div>
+
+
+    <!--
+    <div class="thegalette g"
+         ng-controller="Galette" ng-include="'chunk-galette.html'"
+         nodata-progress="left: slide.left ; width: slide.right - slide.left ; top: slide.top ; height: slide.bottom - slide.top"
+         data-progress="transform: 'translate(-50%, -50%) translate('+slide.left+'px,'+slide.top+'px) scale('+600/1000*designRatio+') translate(50%, 50%)'"
+         ></div>
+    -->
+    
+    <section class="smark">
+
+# <span class="var-title-br"></span> {*no-status title-slide} // commentaire
+-  {no}
+- Navigate using the arrow keys (right/left) or the buttons on the sides
+-  {no}
+-  {no}
+- <span class="var-date"></span>
+- <span class="var-author"></span>
+- <span class="var-affiliation"></span>
+
+# The Galette cutting problem
+- We have a Galette (King's Cake)
+- It contains a bean
+- We want to cut it
+  - in $N$ equal slices
+  - without hitting the bean
+- What is the probability to achieve this?
+
+    </section>
+    <section class="slide">
+        
+        <div class="thegalette"
+             ng-include="'chunk-galette.html'"
+         ></div>
+        <div class="thecontrols"
+             ng-include="'chunk-galette-controls.html'"
+         ></div>
+        
+        <section class="smark">
+
+# The King's cake (Galette) {libyli}
+- @anim: g.brown +
+- $R_G$ {params} // radius of the galette
+- @anim: .slices +
+- $N$ {params} // number of pieces to cut
+- @anim: .feve1 +
+- $r$ {params} // radius of the bean (a circle)
+- @anim: .border + .R +
+- $R = R_G - r$ // possible radius for the bean center
+- @anim: .feve2 | .blue | .feve3 | .green | -.feve
+- @anim: %+class:showthem:.thecontrols
+- @anim: %+class:foggy:.content
+- @anim: .rhombus .theta +
+- $\theta = \frac{360}{N}$ // angle of a slice
+- @anim: %-class:showthem:.thecontrols
+- @anim: %viewbox:svg .zoomRhombus
+- @anim: .rhombus .shape | .rhombus .a | .rhombus .height +
+- $\sin(\theta) = \frac{r}{a}  ; a = r / \sin(\theta)$ // side of the rhombus
+- @anim: %+class:nothome:.rhombus .theta | .rhombus .dashed | .rhombus .x +
+- $x = a + a \cos(\theta)$ // horizontal position of the rhombus corner
+- @anim: %viewbox:svg .zoomSlice | -.rhombus
+- @anim: .area .split | .rectwr | .rectwr .r, .rectwr .x | .rectwr .w +
+- $w$ // width of the rectangle
+- @anim: .area .beta .diag +
+- $R^2 = w^2 + r^2$ // diagonal of the rectangle (Pythagore)
+- $w = \sqrt{R^2 - r^2}$ // width of the rectangle
+- @anim: .tri +
+- $A_t = \frac{r w}{2} {}$ *et $A_h = \frac{r x}{2} {}$* // area of the upper rectangles
+- @anim: .upperleft
+- @anim: .area .beta .angle +
+- $\sin(\beta) = r / R$ <br/>donc : $\beta = \arcsin(r/R)$ // angle of the blue slice
+- @anim: .area .beta .zone +
+- $A_b = \pi R^2 \cdot \beta / 360$ // area of the slice with angle $\beta$
+- $A_p = \pi R^2 \cdot \theta / 360$ // area of the complete slice (with angle $\theta$)
+- $A = A\_b + A\_t - A\_h$ // white area
+- $A = \pi R^2 \cdot \frac{\beta}{360} + \frac{r w}{2} - \frac{r x}{2} {}$ // ... developped
+- $p = (A\_p - 2 A) / A_p {}$  // probability of not cutting the bean
+- $p = 1 - \frac{2 A}{A_p} {}$ // seen differently
+- @anim: %+class:showthem:.thecontrols
+- @anim: %dur:1000 + %viewbox:.zoomAll
+- Thanks!
+
+</section>
+
+    </section>
+    
+    <div class="prevnext">
+        <a href="#" class="deck-prev-link" title="Previous">&#8592;</a>
+        <a href="#" class="deck-next-link" title="Next">&#8594;</a>
+    </div>
+    
+<!-- deck.status snippet -->
+<p class="deck-status deck-progress-10"> <span class="deck-status-current"></span> / <span class="deck-status-total"></span> − <span class="var-author">will be replaced by the author</span> − <span class="var-title">will be replaced by the title</span></p>
+<a data-progress-size=": spe.top(15, 555); height: 45*designRatio; left: slide.right - 90*designRatio; width: 90*designRatio" class="ccby" href="http://en.wikipedia.org/wiki/Creative_Commons_license" title="This work is under CC-BY licence." target="_blank"></a>
+
+</div>
+</body>
+</html>
