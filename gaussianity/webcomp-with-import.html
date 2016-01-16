@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+      <script src="jquery.min.js"></script>
+      <script src="webcomponentsjs-0.7.20/webcomponents.min.js"></script>
+      <script src="knockout-3.4.0.js"></script>
+
+  <style>
+      #chart { width: 800px; height: 600px; outline: 2px solid blue;}
+      #chart { position: relative; }
+
+      #chart>* {position: absolute; }
+
+      #side { height: 100px; width: 500px; transform-origin: 0 0;
+            transform: translate(100px, 0px) rotate(90deg); left:0; top:0; outline: 1px dashed green; }
+      #bottom { width: 700px; height: 100px; right:0; bottom:0; outline: 1px dashed pink;}
+      #main { width: 700px; height: 500px; right:0; top:0; outline: 1px solid yellow;}
+  </style>
+
+
+
+  </head>
+  <body>
+      <link rel="import" href="webcomp-with-import-sub.html"></link>
+      <x-foo id="hum" tutu="20">will change</x-foo>
+      <br/>
+      <x-gauss id="ggg1" tutu="20" sx="50" sy="100">will change</x-gauss>
+      <br/>
+      <x-gauss  data-bind='attr: {tutu: angle, toto: angle}' id="ggg2" tutu="20" sx="100" sy="50">will change</x-gauss>
+
+
+
+<script>
+$({foo:0}).animate({foo:1000}, {
+    duration: 5000,
+    step: function(val) {
+        $('x-gauss').attr('angle', parseInt(val));
+    }
+})
+  </script>
+
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<html>
+<template id="tpl-gauss">
+    <h1>TEST</h1>
+    <svg width="400px" height="300px" viewbox="-300 -200 600 400">
+    <g data-bind="attr: {transform: rotate()}">»
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:sx(), ry:sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:0.5*sx(), ry:0.5*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+    </g>
+    </svg>
+</template>
+
+<script>
+
+var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+};
+
+var importDoc = document._currentScript.ownerDocument; // importee
+
+var XGaussPrototype = Object.create(HTMLElement.prototype);
+XGaussPrototype.createdCallback = function() {
+
+    console.log(document)
+
+    var comp = this;
+    var tpl = importDoc.getElementById('tpl-gauss');
+    var shadow = this.createShadowRoot();
+    var node = document.importNode(tpl.content, true);
+    shadow.appendChild(node);
+
+    var add = function(name, def) {
+        var v = comp.getAttribute(name);
+        if (v == null) {
+            v = def;
+        }
+        this[name] = ko.observable(v);
+    };
+    var ViewModel = function() {
+        this.add = add;
+        this.add('angle', 0);
+        this.add('sx', 100);
+        this.add('sy', 20);
+        this.rotate = ko.computed(function() {
+            return 'rotate('+this.angle()+')';
+        }, this);
+    };
+
+    var mod = new ViewModel();
+    this.model = mod;
+    //ko.applyBindings(this.model, this);
+    myeach(shadow.children, function(e,i) {
+        ko.applyBindings(mod, e);
+    });
+};
+XGaussPrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+    if (name in this.model) {
+        this.model[name](newVal);
+    }
+};
+
+var XGauss = document.registerElement('x-gauss', {
+  prototype: XGaussPrototype
+});
+</script>
+</html>

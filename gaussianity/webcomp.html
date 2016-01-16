@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+  <head>
+      <script src="jquery.min.js"></script>
+      <script src="webcomponentsjs-0.7.20/webcomponents.min.js"></script>
+      <script src="knockout-3.4.0.js"></script>
+
+  <style>
+      #chart { width: 800px; height: 600px; outline: 2px solid blue;}
+      #chart { position: relative; }
+
+      #chart>* {position: absolute; }
+
+      #side { height: 100px; width: 500px; transform-origin: 0 0;
+            transform: translate(100px, 0px) rotate(90deg); left:0; top:0; outline: 1px dashed green; }
+      #bottom { width: 700px; height: 100px; right:0; bottom:0; outline: 1px dashed pink;}
+      #main { width: 700px; height: 500px; right:0; top:0; outline: 1px solid yellow;}
+  </style>
+
+
+
+  </head>
+  <body>
+      <x-foo id="hum" tutu="20">will change</x-foo>
+      <br/>
+      <x-gauss id="ggg1" tutu="20" sx="50" sy="100">will change</x-gauss>
+      <br/>
+      <x-gauss  data-bind='attr: {tutu: angle, toto: angle}' id="ggg2" tutu="20" sx="100" sy="50">will change</x-gauss>
+
+
+
+  <link rel="import" href="webcomp-gauss.html"></link>
+<script>
+var h = document.getElementById("hum");
+$({foo:0}).animate({foo:1000}, {
+    duration: 5000,
+    step: function(val) {
+        $(h).attr('tutu', parseInt(val));
+        $('x-gauss').attr('angle', parseInt(val));
+    }
+})
+  </script>
+
+<template id="tpl-gauss">
+    <h1>TEST</h1>
+    <svg width="400px" height="300px" viewbox="-300 -200 600 400">
+    <g data-bind="attr: {transform: rotate()}">»
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:sx(), ry:sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:0.5*sx(), ry:0.5*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+    </g>
+    </svg>
+</template>
+
+<script>
+
+var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+};
+
+var XGaussPrototype = Object.create(HTMLElement.prototype);
+XGaussPrototype.createdCallback = function() {
+
+    var comp = this;
+    var tpl = document.getElementById('tpl-gauss');
+    var shadow = this.createShadowRoot();
+    var node = document.importNode(tpl.content, true);
+    shadow.appendChild(node);
+
+    var add = function(name, def) {
+        var v = comp.getAttribute(name);
+        if (v == null) {
+            v = def;
+        }
+        this[name] = ko.observable(v);
+    };
+    var ViewModel = function() {
+        this.add = add;
+        this.add('angle', 0);
+        this.add('sx', 100);
+        this.add('sy', 20);
+        this.rotate = ko.computed(function() {
+            return 'rotate('+this.angle()+')';
+        }, this);
+    };
+
+    var mod = new ViewModel();
+    this.model = mod;
+    //ko.applyBindings(this.model, this);
+    myeach(shadow.children, function(e,i) {
+        ko.applyBindings(mod, e);
+    });
+};
+XGaussPrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+    if (name in this.model) {
+        this.model[name](newVal);
+    }
+};
+
+var XGauss = document.registerElement('x-gauss', {
+  prototype: XGaussPrototype
+});
+</script>
+
+
+
+  <script>
+var XFooPrototype = Object.create(HTMLElement.prototype);
+XFooPrototype.createdCallback = function() {
+  this.textContent = "I'm an x-foo!!!! " + this.getAttribute('tutu');
+};
+XFooPrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+  this.textContent = "upd: " + oldVal + '->' + newVal;
+  //console.log("upd: " + oldVal + '->' + newVal);
+};
+XFooPrototype.foo = function() {
+  console.log('foo() called');
+};
+
+var XFoo = document.registerElement('x-foo', {
+  prototype: XFooPrototype
+});
+
+</script>
+
+
+  </body>
+</html>
