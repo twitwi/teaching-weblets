@@ -25,19 +25,23 @@
   <body>
       <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
 
-      <gauss-2d id="gg" cxx="50" cyy="100" cxy="20"
+      <gauss-2d id="gg" cxx="250" cyy="1000" cxy="-300"
                 data-bind="
 attr: {
   cxx: cxx,
   cyy: cyy,
-  cxy: cxy
+  cxy: cxy,
+  constx: constx,
+  consty: consty
 }
       ">will change</gauss-2d>
 
     <hr/>
-    <br/> <input type="range" min="0" max="100" data-bind="value: cxx, valueUpdate: 'input'"/>
-    <br/> <input type="range" min="0" max="100" data-bind="value: cyy, valueUpdate: 'input'"/>
+    <br/> <input type="range" min="0" max="1000" data-bind="value: cxx, valueUpdate: 'input'"/>
+    <br/> <input type="range" min="0" max="1000" data-bind="value: cyy, valueUpdate: 'input'"/>
     <br/> <input type="range" min="0" max="1000" data-bind="value: cxy1000, valueUpdate: 'input'"/>
+    <br/> <input type="range" min="-100" max="100" data-bind="value: constx, valueUpdate: 'input'"/>
+    <br/> <input type="range" min="-100" max="100" data-bind="value: consty, valueUpdate: 'input'"/>
     <hr/>
 
 
@@ -46,6 +50,7 @@ var around = {
     _comp: document.getElementById('gg')
 };
 around.add = function(name, def) {
+    if (typeof def === 'undefined') def = 0;
     var v = this._comp.getAttribute(name);
     if (v == null) {
         v = def;
@@ -53,7 +58,7 @@ around.add = function(name, def) {
     this[name] = ko.observable(v);
     return this;
 };
-around.add('cxx', 10).add('cyy', 50).add('cxy1000', 500);
+around.add('cxx').add('cyy').add('cxy1000', 750).add('constx').add('consty');
 around.cxy = ko.computed(function() {
     return (this.cxy1000() - 500)/500 * Math.sqrt(this.cxx() * this.cyy());
 }, around);
@@ -70,16 +75,46 @@ ko.applyBindings(around);
 
 <template id="tpl-gauss2d">
     <span>TEST</span>
+    <style>
+.marginal-proba {
+    fill: none;
+    stroke: blue;
+    stroke-width: 2;
+}
+.conditional-mark {
+    stroke: black;
+    stroke-width: 1;
+    stroke-dasharray: 5, 5;
+}
+.conditional-proba {
+    fill: none;
+    stroke: black;
+    stroke-width: 2;
+}
+    </style>
     <svg width="600px" height="400px" viewbox="-300 -200 600 400" style="display: inline">
     <g data-bind="attr: {transform: rotate}">»
         <ellipse cx="0" cy="0" data-bind='attr:{rx:sx, ry:sy}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
-        <ellipse cx="0" cy="0" data-bind='attr:{rx:0.5*sx(), ry:0.5*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:2*sx(), ry:2*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:3*sx(), ry:3*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+        <line y1="0" y2="0" data-bind='attr:{x1:-3*sx(), x2:3*sx()}' fill="none" stroke="blue" stroke-width="1" ></line>
+        <line x1="0" x2="0" data-bind='attr:{y1:-3*sy(),y2:3*sy()}' fill="none" stroke="blue" stroke-width="1" ></line>
+    </g>
+    <g class="conditional-mark">
+        <line data-bind="attr: {y1: consty, y2: consty}" x1="-100" x2="100"></line>
+        <line data-bind="attr: {x1: constx, x2: constx}" y1="-100" y2="100"></line>
     </g>
     <g transform="translate(0, 190) scale(1, -1)">
-        <path data-bind="attr: {d:pathMarginalX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" fill="none" stroke="blue" stroke-width="2"/>
+        <path data-bind="attr: {d:pathMarginalX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="marginal-proba"/>
     </g>
     <g transform="translate(-190, 0)">
-        <path data-bind="attr: {d:pathMarginalY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" fill="none" stroke="blue" stroke-width="2"/>
+        <path data-bind="attr: {d:pathMarginalY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="marginal-proba"/>
+    </g>
+    <g transform="translate(0, -110) scale(1, -1)">
+        <path data-bind="attr: {d:pathConditionalXGivenY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="conditional-proba"/>
+    </g>
+    <g transform="translate(110, 0)">
+        <path data-bind="attr: {d:pathConditionalYGivenX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="conditional-proba"/>
     </g>
     </svg>
 </template>
@@ -116,9 +151,14 @@ XGauss2DPrototype.createdCallback = function() {
     };
     var ViewModel = function() {
         this.add = add;
-        this.add('cxx', 10);
-        this.add('cyy', 20);
-        this.add('cxy', 10);
+        this.add('cxx', 50*50);
+        this.add('cyy', 100*100);
+        this.add('cxy', -40);
+        this.add('constx', 0);
+        this.add('consty', 0);
+        this.rho = ko.computed(function() {
+            return this.cxy() / Math.sqrt(this.cxx() * this.cyy());
+        }, this);
         this.eig = ko.computed(function() {
             var eig = numeric.eig([[this.cxx(), this.cxy()], [this.cxy(), this.cyy()]]);
             if (eig.lambda.x[1] > eig.lambda.x[0]) {
@@ -128,10 +168,10 @@ XGauss2DPrototype.createdCallback = function() {
             return eig;
         }, this);
         this.sx = ko.computed(function() {
-            return this.eig().lambda.x[1];
+            return Math.sqrt(this.eig().lambda.x[1]);
         }, this);
         this.sy = ko.computed(function() {
-            return this.eig().lambda.x[0];
+            return Math.sqrt(this.eig().lambda.x[0]);
         }, this);
         this.angle = ko.computed(function() {
             var v = this.eig().E.x[0];
@@ -140,11 +180,12 @@ XGauss2DPrototype.createdCallback = function() {
         this.rotate = ko.computed(function() {
             return 'rotate('+this.angle()+')';
         }, this);
+        var marginalScale = 2.5;
         this.pathMarginalX = ko.computed(function() {
             var stdX = Math.sqrt(this.cxx());
             var points = numeric.linspace(-100, 100, 100+1);
             points = points.map(function(x) {
-                var y = normalPDF(x, stdX);
+                var y = normalPDF(x, stdX) * marginalScale;
                 return x + " " + y;
             });
             return "M " + points.join(" L ");
@@ -153,7 +194,28 @@ XGauss2DPrototype.createdCallback = function() {
             var stdY = Math.sqrt(this.cyy());
             var points = numeric.linspace(-100, 100, 100+1);
             points = points.map(function(y) {
-                var x = normalPDF(y, stdY);
+                var x = normalPDF(y, stdY) * marginalScale;
+                return x + " " + y;
+            });
+            return "M " + points.join(" L ");
+        }, this);
+        var conditionalScale = 2.5;
+        this.pathConditionalXGivenY = ko.computed(function() {
+            var deltaX = this.cxy() / this.cyy() * this.consty();
+            var stdX = Math.sqrt(this.cxx() - this.cxy()/this.cyy()*this.cxy());
+            var points = numeric.linspace(-100, 100, 100+1);
+            points = points.map(function(x) {
+                var y = normalPDF(x - deltaX, stdX) * conditionalScale;
+                return x + " " + y;
+            });
+            return "M " + points.join(" L ");
+        }, this);
+        this.pathConditionalYGivenX = ko.computed(function() {
+            var deltaY = this.cxy() / this.cxx() * this.constx();
+            var stdY = Math.sqrt(this.cyy() - this.cxy()/this.cxx()*this.cxy());
+            var points = numeric.linspace(-100, 100, 100+1);
+            points = points.map(function(y) {
+                var x = normalPDF(y - deltaY, stdY) * conditionalScale;
                 return x + " " + y;
             });
             return "M " + points.join(" L ");
