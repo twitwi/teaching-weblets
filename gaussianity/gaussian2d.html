@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+  <head>
+      <script src="jquery.min.js"></script>
+      <script src="webcomponentsjs-0.7.20/webcomponents.min.js"></script>
+      <script src="knockout-3.4.0.js"></script>
+      <script src="numeric-1.2.6.min.js"></script>
+
+  <style>
+      #chart { width: 800px; height: 600px; outline: 2px solid blue;}
+      #chart { position: relative; }
+
+      #chart>* {position: absolute; }
+
+      #side { height: 100px; width: 500px; transform-origin: 0 0;
+            transform: translate(100px, 0px) rotate(90deg); left:0; top:0; outline: 1px dashed green; }
+      #bottom { width: 700px; height: 100px; right:0; bottom:0; outline: 1px dashed pink;}
+      #main { width: 700px; height: 500px; right:0; top:0; outline: 1px solid yellow;}
+      x-gauss {width: 400px; display: inline;}
+  </style>
+
+
+
+  </head>
+  <body>
+      <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
+
+      <gauss-2d id="gg" cxx="50" cyy="100" cxy="20"
+                data-bind="
+attr: {
+  cxx: cxx,
+  cyy: cyy,
+  cxy: cxy
+}
+      ">will change</gauss-2d>
+
+    <hr/>
+    <br/> <input type="range" min="0" max="100" data-bind="value: cxx, valueUpdate: 'input'"/>
+    <br/> <input type="range" min="0" max="100" data-bind="value: cyy, valueUpdate: 'input'"/>
+    <br/> <input type="range" min="0" max="1000" data-bind="value: cxy1000, valueUpdate: 'input'"/>
+    <hr/>
+
+
+    <script>
+var around = {
+    _comp: document.getElementById('gg')
+};
+around.add = function(name, def) {
+    var v = this._comp.getAttribute(name);
+    if (v == null) {
+        v = def;
+    }
+    this[name] = ko.observable(v);
+    return this;
+};
+around.add('cxx', 10).add('cyy', 50).add('cxy1000', 500);
+around.cxy = ko.computed(function() {
+    return (this.cxy1000() - 500)/500 * Math.sqrt(this.cxx() * this.cyy());
+}, around);
+around.maxcxy = ko.computed(function() {
+    return Math.sqrt(this.cxx() * this.cyy());
+}, around);
+ko.applyBindings(around);
+    </script>
+
+
+
+
+
+
+<template id="tpl-gauss2d">
+    <span>TEST</span>
+    <svg width="600px" height="400px" viewbox="-300 -200 600 400" style="display: inline">
+    <g data-bind="attr: {transform: rotate}">»
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:sx, ry:sy}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:0.5*sx(), ry:0.5*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+    </g>
+    <g transform="translate(0, 190) scale(1, -1)">
+        <path data-bind="attr: {d:pathMarginalX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" fill="none" stroke="blue" stroke-width="2"/>
+    </g>
+    <g transform="translate(-190, 0)">
+        <path data-bind="attr: {d:pathMarginalY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" fill="none" stroke="blue" stroke-width="2"/>
+    </g>
+    </svg>
+</template>
+
+<script>
+
+var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+};
+var normalPDF = function(xminusmu, sigma) { // 0 centered
+    return 1000* Math.exp( - xminusmu*xminusmu / (2*sigma*sigma)) / (sigma * 2 * Math.sqrt(Math.PI));
+};
+
+var XGauss2DPrototype = Object.create(HTMLElement.prototype);
+XGauss2DPrototype.createdCallback = function() {
+
+    var comp = this;
+    var tpl = document.getElementById('tpl-gauss2d');
+    var shadow = this.createShadowRoot();
+    var node = document.importNode(tpl.content, true);
+    shadow.appendChild(node);
+
+    var add = function(name, def) {
+        var v = comp.getAttribute(name);
+        if (v == null) {
+            v = def;
+        }
+        this[name] = ko.observable(v);
+    };
+    var swap = function(a, i, j) {
+        var tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    };
+    var ViewModel = function() {
+        this.add = add;
+        this.add('cxx', 10);
+        this.add('cyy', 20);
+        this.add('cxy', 10);
+        this.eig = ko.computed(function() {
+            var eig = numeric.eig([[this.cxx(), this.cxy()], [this.cxy(), this.cyy()]]);
+            if (eig.lambda.x[1] > eig.lambda.x[0]) {
+                swap(eig.lambda.x, 0, 1);
+                swap(eig.E.x, 0, 1);
+            }
+            return eig;
+        }, this);
+        this.sx = ko.computed(function() {
+            return this.eig().lambda.x[1];
+        }, this);
+        this.sy = ko.computed(function() {
+            return this.eig().lambda.x[0];
+        }, this);
+        this.angle = ko.computed(function() {
+            var v = this.eig().E.x[0];
+            return 90 - 1 * Math.atan2(v[1], v[0])/Math.PI*180; // -1 as y is virtually reversed
+        }, this);
+        this.rotate = ko.computed(function() {
+            return 'rotate('+this.angle()+')';
+        }, this);
+        this.pathMarginalX = ko.computed(function() {
+            var stdX = Math.sqrt(this.cxx());
+            var points = numeric.linspace(-100, 100, 100+1);
+            points = points.map(function(x) {
+                var y = normalPDF(x, stdX);
+                return x + " " + y;
+            });
+            return "M " + points.join(" L ");
+        }, this);
+        this.pathMarginalY = ko.computed(function() {
+            var stdY = Math.sqrt(this.cyy());
+            var points = numeric.linspace(-100, 100, 100+1);
+            points = points.map(function(y) {
+                var x = normalPDF(y, stdY);
+                return x + " " + y;
+            });
+            return "M " + points.join(" L ");
+        }, this);
+    };
+
+    var mod = new ViewModel();
+    this.model = mod;
+    //ko.applyBindings(this.model, this);
+    myeach(shadow.children, function(e,i) {
+        ko.applyBindings(mod, e);
+    });
+};
+XGauss2DPrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+    if (name in this.model) {
+        this.model[name](newVal);
+    }
+};
+
+var XGauss2D = document.registerElement('gauss-2d', {
+  prototype: XGauss2DPrototype
+});
+</script>
+
+
+  </body>
+</html>
