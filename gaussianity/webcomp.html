@@ -15,37 +15,46 @@
             transform: translate(100px, 0px) rotate(90deg); left:0; top:0; outline: 1px dashed green; }
       #bottom { width: 700px; height: 100px; right:0; bottom:0; outline: 1px dashed pink;}
       #main { width: 700px; height: 500px; right:0; top:0; outline: 1px solid yellow;}
+      x-gauss {width: 400px; display: inline;}
   </style>
 
 
 
   </head>
   <body>
+      <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
       <x-foo id="hum" tutu="20">will change</x-foo>
       <br/>
-      <x-gauss id="ggg1" tutu="20" sx="50" sy="100">will change</x-gauss>
+      <x-gauss id="ggg1" class="auto" sx="50" sy="100">will change</x-gauss>
+      <x-gauss class="auto" id="ggg2" sx="100" sy="50">will change</x-gauss>
       <br/>
-      <x-gauss  data-bind='attr: {tutu: angle, toto: angle}' id="ggg2" tutu="20" sx="100" sy="50">will change</x-gauss>
+      <x-gauss data-bind='attr: {angle: ga}' sx="100" sy="50">will change</x-gauss>
+      <x-gauss data-bind='attr: {angle: ga}' sx="100" sy="50">will change</x-gauss>
+      <input type="range" min="0" max="720" data-bind="value: ga, valueUpdate: 'input'"/>
+      <input type="button" onclick='$("x-gauss").attr("angle", 42);'/>
 
 
-
-  <link rel="import" href="webcomp-gauss.html"></link>
 <script>
 var h = document.getElementById("hum");
 $({foo:0}).animate({foo:1000}, {
-    duration: 5000,
+    duration: 1000,
     step: function(val) {
         $(h).attr('tutu', parseInt(val));
-        $('x-gauss').attr('angle', parseInt(val));
+        $('.auto').each( function() {
+            this.setAttribute('angle', parseInt(val));
+        });
+            
     }
 })
+
+
   </script>
 
 <template id="tpl-gauss">
-    <h1>TEST</h1>
-    <svg width="400px" height="300px" viewbox="-300 -200 600 400">
-    <g data-bind="attr: {transform: rotate()}">»
-        <ellipse cx="0" cy="0" data-bind='attr:{rx:sx(), ry:sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
+    <span>TEST</span>
+    <svg width="400px" height="300px" viewbox="-300 -200 600 400" style="display: inline">
+    <g data-bind="attr: {transform: rotate}">»
+        <ellipse cx="0" cy="0" data-bind='attr:{rx:sx, ry:sy}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
         <ellipse cx="0" cy="0" data-bind='attr:{rx:0.5*sx(), ry:0.5*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
     </g>
     </svg>
@@ -91,6 +100,7 @@ XGaussPrototype.createdCallback = function() {
     });
 };
 XGaussPrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+        console.log(name, oldVal, newVal)
     if (name in this.model) {
         this.model[name](newVal);
     }
@@ -119,6 +129,9 @@ XFooPrototype.foo = function() {
 var XFoo = document.registerElement('x-foo', {
   prototype: XFooPrototype
 });
+
+ko.applyBindings({ ga: ko.observable(90) });
+
 
 </script>
 
