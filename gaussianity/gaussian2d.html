@@ -1,8 +1,8 @@
 <!doctype html>
 <html>
   <head>
-      <script src="jquery.min.js"></script>
-      <script src="webcomponentsjs-0.7.20/webcomponents.min.js"></script>
+      <!--script src="jquery.min.js"></script-->
+      <!--script src="webcomponentsjs-0.7.20/webcomponents.min.js"></script-->
       <script src="knockout-3.4.0.js"></script>
       <script src="numeric-1.2.6.min.js"></script>
 
@@ -25,7 +25,7 @@
   <body>
       <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
 
-      <gauss-2d id="gg" cxx="250" cyy="1000" cxy="-300"
+      <gauss-2d id="gg" cxx="1000" cyy="300" cxy="-500"
                 data-bind="
 attr: {
   cxx: cxx,
@@ -76,45 +76,67 @@ ko.applyBindings(around);
 <template id="tpl-gauss2d">
     <span>TEST</span>
     <style>
-.marginal-proba {
-    fill: none;
+.marginal {
     stroke: blue;
-    stroke-width: 2;
 }
-.conditional-mark {
+.marginal text {
+    stroke: none;
+    fill: blue;
+}
+.conditional {
     stroke: black;
-    stroke-width: 1;
-    stroke-dasharray: 5, 5;
+    stroke-dasharray: 8, 4;
 }
-.conditional-proba {
+.conditional text {
+    stroke: none;
+    fill: black;
+}
+.proba {
     fill: none;
-    stroke: black;
     stroke-width: 2;
 }
+.mark {
+    stroke-width: 1;
+}
+svg {outline: 10px solid #EEE;}
     </style>
-    <svg width="600px" height="400px" viewbox="-300 -200 600 400" style="display: inline">
-    <g data-bind="attr: {transform: rotate}">»
+    <svg width="400px" height="400px" viewbox="-200 -200 400 400" style="display: inline">
+    <g data-bind="attr: {transform: rotate}">
         <ellipse cx="0" cy="0" data-bind='attr:{rx:sx, ry:sy}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
         <ellipse cx="0" cy="0" data-bind='attr:{rx:2*sx(), ry:2*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
         <ellipse cx="0" cy="0" data-bind='attr:{rx:3*sx(), ry:3*sy()}' fill="none" stroke="blue" stroke-width="2" ></ellipse>
         <line y1="0" y2="0" data-bind='attr:{x1:-3*sx(), x2:3*sx()}' fill="none" stroke="blue" stroke-width="1" ></line>
         <line x1="0" x2="0" data-bind='attr:{y1:-3*sy(),y2:3*sy()}' fill="none" stroke="blue" stroke-width="1" ></line>
     </g>
-    <g class="conditional-mark">
+
+    <g class="marginal" transform="rotate(90) translate(0, 195)">
+        <text font-size="14" text-anchor="middle">p(Y)</text>
+    </g>
+    <g class="marginal proba" transform="translate(0, 190) scale(1, -1)">
+        <path data-bind="attr: {d:pathMarginalX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0"/>
+    </g>
+    <g class="marginal" transform="translate(0, 195)">
+        <text font-size="14" text-anchor="middle">p(X)</text>
+    </g>
+    <g class="marginal proba" transform="translate(-190, 0)">
+        <path data-bind="attr: {d:pathMarginalY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0"/>
+    </g>
+
+    <g class="conditional mark">
         <line data-bind="attr: {y1: consty, y2: consty}" x1="-100" x2="100"></line>
         <line data-bind="attr: {x1: constx, x2: constx}" y1="-100" y2="100"></line>
     </g>
-    <g transform="translate(0, 190) scale(1, -1)">
-        <path data-bind="attr: {d:pathMarginalX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="marginal-proba"/>
+    <g class="conditional" transform="translate(0, -185)">
+        <text font-size="14" text-anchor="middle">p( X | Y=y )</text>
     </g>
-    <g transform="translate(-190, 0)">
-        <path data-bind="attr: {d:pathMarginalY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="marginal-proba"/>
+    <g class="conditional proba" transform="translate(0, -110) scale(1, -1)">
+        <path data-bind="attr: {d:pathConditionalXGivenY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0"/>
     </g>
-    <g transform="translate(0, -110) scale(1, -1)">
-        <path data-bind="attr: {d:pathConditionalXGivenY}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="conditional-proba"/>
+    <g class="conditional" transform="rotate(90) translate(0, -185)">
+        <text font-size="14" text-anchor="middle">p( Y | X=x )</text>
     </g>
-    <g transform="translate(110, 0)">
-        <path data-bind="attr: {d:pathConditionalYGivenX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0" class="conditional-proba"/>
+    <g class="conditional proba" transform="translate(110, 0)">
+        <path data-bind="attr: {d:pathConditionalYGivenX}" d="M -100 0 L -50 0 L 0 100 L 50 40 L 100 0"/>
     </g>
     </svg>
 </template>
