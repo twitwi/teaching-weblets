@@ -36,13 +36,14 @@ attr: {
 }
       ">will change</gauss-2d>
 
-    <hr/>
-    <br/> <input type="range" min="0" max="1000" data-bind="value: cxx, valueUpdate: 'input'"/>
-    <br/> <input type="range" min="0" max="1000" data-bind="value: cyy, valueUpdate: 'input'"/>
-    <br/> <input type="range" min="0" max="1000" data-bind="value: cxy1000, valueUpdate: 'input'"/>
-    <br/> <input type="range" min="-100" max="100" data-bind="value: constx, valueUpdate: 'input'"/>
-    <br/> <input type="range" min="-100" max="100" data-bind="value: consty, valueUpdate: 'input'"/>
-    <hr/>
+      <div style="float:right">
+
+    <br/> <input type="range" min="0" max="1000" data-bind="value: cxx, valueUpdate: 'input'"/> cxx
+    <br/> <input type="range" min="0" max="1000" data-bind="value: cyy, valueUpdate: 'input'"/> cyy
+    <br/> <input type="range" min="0" max="1000" data-bind="value: cxy1000, valueUpdate: 'input'"/> cxy
+    <br/> <input type="range" min="-100" max="100" data-bind="value: constx, valueUpdate: 'input'"/> x
+    <br/> <input type="range" min="-100" max="100" data-bind="value: consty, valueUpdate: 'input'"/> y
+      </div>
 
 
     <script>

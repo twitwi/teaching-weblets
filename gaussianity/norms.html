@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+  <head>
+      <script src="jquery.min.js"></script>
+      <script src="knockout-3.4.0.js"></script>
+      <script src="numeric-1.2.6.min.js"></script>
+
+  <style>
+      #chart { width: 800px; height: 600px; outline: 2px solid blue;}
+      #chart { position: relative; }
+
+      #chart>* {position: absolute; }
+
+      #side { height: 100px; width: 500px; transform-origin: 0 0;
+            transform: translate(100px, 0px) rotate(90deg); left:0; top:0; outline: 1px dashed green; }
+      #bottom { width: 700px; height: 100px; right:0; bottom:0; outline: 1px dashed pink;}
+      #NOTmain { width: 700px; height: 500px; right:0; top:0; outline: 1px solid yellow;}
+      x-gauss {width: 400px; display: inline;}
+  </style>
+
+
+
+  </head>
+  <body>
+      <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
+
+      <x-norms id="gg" p="1"
+                data-bind="
+attr: {
+  p: p
+}
+      ">will change</x-norms>
+
+    <br/>
+    <input style="width:400px" type="range" min="0" data-bind="value: pslider, valueUpdate: 'input', attr: {max: pstep()*pmax()}"/> <br/>p: <span data-bind="text: pslider() / pstep()"></span>
+
+    <br/> <button onclick="
+$({foo:0}).animate({foo:1}, {
+    duration: 3000,
+    easing: 'linear',
+    step: function(val) {
+        var v = val * around.pstep()*around.pmax() / 10;
+        console.log(v);
+        around.pslider(parseInt(v));
+    }
+})
+">anim</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">0</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">1</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">2</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">3</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">4</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">5</button>
+
+    <button onclick="$('#gg').attr('p', this.textContent)">10</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">100</button>
+    <button onclick="$('#gg').attr('p', this.textContent)">1000</button>
+
+    <script>
+var around = {
+    _comp: document.getElementById('gg')
+};
+around.add = function(name, def) {
+    if (typeof def === 'undefined') def = 0;
+    var v = this._comp.getAttribute(name);
+    if (v == null) {
+        v = def;
+    }
+    this[name] = ko.observable(v);
+    return this;
+};
+around.add('pstep', 100);
+around.add('pmax', 42);
+around.add('pslider', 2*around.pstep());
+around.p = ko.computed(function() {
+    return this.pslider()/this.pstep();
+}, around);
+ko.applyBindings(around);
+    </script>
+
+
+
+
+
+
+<template id="tpl-norms">
+    <style>
+.sphere1 {
+    stroke: blue;
+    stroke-width: 2;
+    fill: none;
+}
+.axes {
+    stroke: black;
+    stroke-width: 1;
+    fill: none;
+}
+.thetext {
+    fill: darkgreen;
+    text-anchor: middle;
+}
+svg {outline: 10px solid #EEE;}
+    </style>
+    <svg width="400px" height="400px" viewbox="-200 -200 400 400" style="display: inline">
+    <g class="thetext">
+        <text data-bind="text: 'p = '+p()" x="0" y="120">p</text>
+    </g>
+    <g class="axes">
+        <line y1="0" y2="0" x1="-100" x2="100"></line>
+        <line x1="0" x2="0" y1="-100" y2="100"></line>
+    </g>
+    <g class="sphere1">
+        <path data-bind="attr: {d:quadrantsPath}" d="M 100 0 L 0 1000"/>
+    </g>
+    </svg>
+</template>
+
+<script>
+
+var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+};
+var normalPDF = function(xminusmu, sigma) { // 0 centered
+    return 1000* Math.exp( - xminusmu*xminusmu / (2*sigma*sigma)) / (sigma * 2 * Math.sqrt(Math.PI));
+};
+
+var XGauss2DPrototype = Object.create(HTMLElement.prototype);
+XGauss2DPrototype.createdCallback = function() {
+
+    var comp = this;
+    var tpl = document.getElementById('tpl-norms');
+    var shadow = this.createShadowRoot();
+    var node = document.importNode(tpl.content, true);
+    shadow.appendChild(node);
+
+    var add = function(name, def) {
+        var v = comp.getAttribute(name);
+        if (v == null) {
+            v = def;
+        }
+        this[name] = ko.observable(v);
+    };
+    var swap = function(a, i, j) {
+        var tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    };
+    var ViewModel = function() {
+        this.add = add;
+        this.add('p', 2);
+        this.quadrantsPath = ko.computed(function() {
+            var xs = numeric.linspace(0, 4, 100*4+1);
+            var p = this.p();
+            var points;
+            points = xs.map(function(pseudoy) {
+                var x,y;
+                if (pseudoy%1 == 0) {
+                    x = 1;
+                    y = 0;
+                } else {
+                    var v = (1 - pseudoy%1) / (pseudoy%1) ; //Math.cos(Math.atan2(pseudoy%1, 1-pseudoy%1));
+                    x = 1 / Math.pow(1 + 1/Math.pow(v, p), 1/p);
+                    y = 1 / Math.pow(1 +   Math.pow(v, p), 1/p);
+                }
+                if (pseudoy < 1) {}
+                else if (pseudoy < 2) { var tmp = x; x=-y;y=tmp;}
+                else if (pseudoy < 3) { x = -x; y = -y;}
+                else if (pseudoy < 4) { var tmp = x; x=y;y=-tmp;}
+                return (100*x) + " " + (100*y);
+            });
+            return "M " + points.join(" L ") + " z";
+        }, this);
+    };
+
+    var mod = new ViewModel();
+    this.model = mod;
+    //ko.applyBindings(this.model, this);
+    myeach(shadow.children, function(e,i) {
+        ko.applyBindings(mod, e);
+    });
+};
+XGauss2DPrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+    if (name in this.model) {
+        this.model[name](newVal);
+    }
+};
+
+var XGauss2D = document.registerElement("x-norms", {
+  prototype: XGauss2DPrototype
+});
+</script>
+
+
+  </body>
+</html>
