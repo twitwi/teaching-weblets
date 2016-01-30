@@ -1,6 +1,7 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
+      <meta charset="utf-8">
       <!--script src="jquery.min.js"></script-->
       <!--script src="webcomponentsjs-0.7.20/webcomponents.min.js"></script-->
       <script src="knockout-3.4.0.js"></script>
@@ -75,7 +76,6 @@ ko.applyBindings(around);
 
 
 <template id="tpl-gauss2d">
-    <span>TEST</span>
     <style>
 .marginal {
     stroke: blue;
@@ -99,7 +99,7 @@ ko.applyBindings(around);
 .mark {
     stroke-width: 1;
 }
-svg {outline: 10px solid #EEE;}
+NOsvg {outline: 10px solid #EEE;}
     </style>
     <svg width="400px" height="400px" viewbox="-200 -200 400 400" style="display: inline">
     <g data-bind="attr: {transform: rotate}">
