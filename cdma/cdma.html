@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <script src="jquery.min.js"></script>
+      <script src="knockout-3.4.0.js"></script>
+      <script src="numeric-1.2.6.min.js"></script>
+
+  <style>
+      #chart { width: 800px; height: 600px; outline: 2px solid blue;}
+      #chart { position: relative; }
+
+      #chart>* {position: absolute; }
+
+      #side { height: 100px; width: 500px; transform-origin: 0 0;
+            transform: translate(100px, 0px) rotate(90deg); left:0; top:0; outline: 1px dashed green; }
+      #bottom { width: 700px; height: 100px; right:0; bottom:0; outline: 1px dashed pink;}
+      #NOTmain { width: 700px; height: 500px; right:0; top:0; outline: 1px solid yellow;}
+      x-gauss {width: 400px; display: inline;}
+  </style>
+
+
+
+  </head>
+  <body>
+      <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
+
+
+      <x-cdma id="gg"
+              noise="0"
+              data-bind="
+attr: {
+  code0: c0,
+  code1: c1,
+  code2: c2,
+  msg0: m0,
+  msg1: m1,
+  msg2: m2
+}
+              ">will change</x-cdma>
+
+    <br/>
+    <input type="text" data-bind="value: c0, valueUpdate: 'input'"/> <br/>
+    <input type="text" data-bind="value: c1, valueUpdate: 'input'"/> <br/>
+    <input type="text" data-bind="value: c2, valueUpdate: 'input'"/> <br/>
+
+
+    <script>
+var around = {
+    _comp: document.getElementById('gg')
+};
+around.add = function(name, def) {
+    if (typeof def === 'undefined') def = 0;
+    var v = this._comp.getAttribute(name);
+    if (v == null) {
+        v = def;
+    }
+    this[name] = ko.observable(v);
+    return this;
+};
+//              code0="1100" code1="1010" code2="1001"
+around.add('c0', '1100');
+around.add('c1', '1010');
+around.add('c2', '0110');
+//              msg0="01001111" msg1="01101011" msg2="00100001"
+around.add('m0', '00001111');
+around.add('m1', '01101100');
+around.add('m2', '01111100');
+/*
+around.add('pstep', 100);
+around.add('pmax', 42);
+around.add('pslider', 2*around.pstep());
+around.p = ko.computed(function() {
+    return this.pslider()/this.pstep();
+}, around);
+*/
+ko.applyBindings(around);
+    </script>
+
+
+
+<template id="tpl-cdma">
+    <style>
+.code {
+    stroke: blue;
+    stroke-width: 2;
+    fill: none;
+}
+.message {
+    stroke: darkgreen;
+    stroke-width: 2;
+    fill: none;
+}
+.coded {
+    stroke: red;
+    stroke-width: 2;
+    fill: none;
+}
+.axes {
+    stroke: black;
+    stroke-width: 1;
+    fill: none;
+}
+.thetext {
+    fill: darkgreen;
+    text-anchor: middle;
+}
+svg {outline: 10px solid #EEE;}
+    </style>
+    <svg width="700px" height="400px" viewbox="-10 -20 700 400" style="display: inline">
+    <!--g class="thetext">
+        <text data-bind="text: 'p = '+p()" x="0" y="120">p</text>
+    </g-->
+    <g class="in0">
+        <g class="code">
+            <path data-bind="attr: {d: c0path}" d="M 100 0 L 0 1000"/>
+        </g>
+        <text data-bind="attr: {transform: transformInputMult}">*</text>
+        <g class="message" data-bind="attr: {transform: transformInputMessage}">
+            <path data-bind="attr: {d: m0path}" d="M 100 0 L 0 1000"/>
+        </g>
+        <text data-bind="attr: {transform: transformInputArr}">&rArr;</text>
+        <g class="coded" data-bind="attr: {transform: transformInputCoded}">
+            <path data-bind="attr: {d: coded0path}" d="M 100 0 L 0 1000"/>
+        </g>
+    </g>
+    <g class="in1" transform="translate(0, 40)">
+        <g class="code">
+            <path data-bind="attr: {d: c1path}" d="M 100 0 L 0 1000"/>
+        </g>
+        <text data-bind="attr: {transform: transformInputMult}">*</text>
+        <g class="message" data-bind="attr: {transform: transformInputMessage}">
+            <path data-bind="attr: {d: m1path}" d="M 100 0 L 0 1000"/>
+        </g>
+        <text data-bind="attr: {transform: transformInputArr}">&rArr;</text>
+        <g class="coded" data-bind="attr: {transform: transformInputCoded}">
+            <path data-bind="attr: {d: coded1path}" d="M 100 0 L 0 1000"/>
+        </g>
+    </g>
+    <g class="in2" transform="translate(0, 80)">
+        <g class="code">
+            <path data-bind="attr: {d: c2path}" d="M 100 0 L 0 1000"/>
+        </g>
+        <text data-bind="attr: {transform: transformInputMult}">*</text>
+        <g class="message" data-bind="attr: {transform: transformInputMessage}">
+            <path data-bind="attr: {d: m2path}" d="M 100 0 L 0 1000"/>
+        </g>
+        <text data-bind="attr: {transform: transformInputArr}">&rArr;</text>
+        <g class="coded" data-bind="attr: {transform: transformInputCoded}">
+            <path data-bind="attr: {d: coded2path}" d="M 100 0 L 0 1000"/>
+        </g>
+    </g>
+    <g class="mixarray" transform="translate(0, 110)">
+        <text data-bind="attr: {transform: transformMapArr}">&rArr;</text>
+    </g>
+    <g class="mix" transform="translate(0, 160)">
+        <g class="coded" data-bind="attr: {transform: transformInputCoded}">
+            <path data-bind="attr: {d: mixedpath}" d="M 100 0 L 0 1000"/>
+        </g>
+    </g>
+    </svg>
+</template>
+
+<script>
+
+var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+};
+
+var XCDMAPrototype = Object.create(HTMLElement.prototype);
+XCDMAPrototype.createdCallback = function() {
+
+    var comp = this;
+    var tpl = document.getElementById('tpl-cdma');
+    var shadow = this.createShadowRoot();
+    var node = document.importNode(tpl.content, true);
+    shadow.appendChild(node);
+
+    var add = function(name, def) {
+        var v = comp.getAttribute(name);
+        if (v == null) {
+            v = def;
+        }
+        this[name] = ko.observable(v);
+    };
+    var swap = function(a, i, j) {
+        var tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
+    };
+    var pos = function(x, binary, scale=10) {
+        return (x*scale)+" "+(binary=='1' ? -10 : 10); // y is reversed
+    };
+    var posOfReal = function(x, real, scale=10) {
+        return (x*scale)+" "+(-real*10); // y is reversed
+    };
+    var pathOf = function(binaryProducer, scale) {
+        return ko.computed(function() {
+            var points = [];
+            var c = binaryProducer();
+            var x = 0;
+            for (i in c) {
+                points.push(pos(x, c[i], scale));
+                x++;
+                points.push(pos(x, c[i], scale));
+            }
+            return "M " + points.join(" L ");
+        }, this);
+    };
+    var pathOfReal = function(realProducer, scale) {
+        return ko.computed(function() {
+            var points = [];
+            var c = realProducer();
+            var x = 0;
+            for (i in c) {
+                points.push(posOfReal(x, c[i], scale));
+                x++;
+                points.push(posOfReal(x, c[i], scale));
+            }
+            return "M " + points.join(" L ");
+        }, this);
+    };
+    var codeConvolution = function(codeGen, msgGen) {
+        return ko.computed(function() {
+            var code = codeGen();
+            var msg = msgGen();
+            var revcode = code.split('').map(function(e) { return e=='0' ? '1' : '0'; }).join('');
+            var res = '';
+            for (i in msg) {
+                res += msg[i] == '1' ? code : revcode;
+            }
+            return res;
+        }, this);
+    };
+    var ViewModel = function() {
+        var mixedScale = 5;
+        this.add = add;
+        this.add('code0', '0011');
+        this.add('code1', '0101');
+        this.add('code2', '1001');
+        this.add('msg0', '010000');
+        this.add('msg1', '111101');
+        this.add('msg2', '101010');
+        this.c0path = pathOf(this.code0)
+        this.c1path = pathOf(this.code1)
+        this.c2path = pathOf(this.code2)
+        this.m0path = pathOf(this.msg0)
+        this.m1path = pathOf(this.msg1)
+        this.m2path = pathOf(this.msg2)
+        this.maxCodeLength = ko.computed(function() {
+            return this.code0().length;
+        }, this);
+        this.transformInputMult = ko.computed(function() {
+            var offset = this.maxCodeLength() * 10 + 10;
+            return 'translate('+offset+', 10)';
+        }, this);
+        this.transformInputMessage = ko.computed(function() {
+            var offset = this.maxCodeLength() * 10 + 30;
+            return 'translate('+offset+', 0)';
+        }, this);
+        this.maxMessageLength = ko.computed(function() {
+            return this.msg0().length;
+        }, this);
+        this.transformInputArr = ko.computed(function() {
+            var offset = this.maxCodeLength() * 10 + 30 + this.maxMessageLength() * 10 + 10;
+            return 'translate('+offset+', 5)';
+        }, this);
+        this.transformInputCoded = ko.computed(function() {
+            var offset = this.maxCodeLength() * 10 + 30 + this.maxMessageLength() * 10 + 30;
+            return 'translate('+offset+', 0)';
+        }, this);
+        this.transformMixedMessage = ko.computed(function() {
+            var offset = this.maxCodeLength() * 10 + 30 + this.maxMessageLength() * 10 * 2 + 40;
+            return 'translate('+offset+', 0)';
+        }, this);
+        this.coded0 = codeConvolution(this.code0, this.msg0);
+        this.coded0path = pathOf(this.coded0, mixedScale)
+        this.coded1 = codeConvolution(this.code1, this.msg1);
+        this.coded1path = pathOf(this.coded1, mixedScale)
+        this.coded2 = codeConvolution(this.code2, this.msg2);
+        this.coded2path = pathOf(this.coded2, mixedScale)
+        this.transformMapArr = ko.computed(function() {
+            var offset = this.maxCodeLength() * 10 + 30 + this.maxMessageLength() * 10 * (1 + mixedScale*this.maxCodeLength()/10 / 2) + 30;
+            return 'rotate(90) translate(0, '+ (-offset)+')';
+        }, this);
+        this.mixed = ko.computed(function() {
+            var m = [this.coded0(), this.coded1(), this.coded2()];
+            var res = [];
+            for (i in m[0]) {
+                res.push(0);
+                for (j in m) {
+                    res[i] += m[j][i] == '0' ? -1 : 1;
+                }
+            }
+            return res;
+        }, this);
+        this.mixedpath = pathOfReal(this.mixed, mixedScale)
+    };
+
+    var mod = new ViewModel();
+    this.model = mod;
+    //ko.applyBindings(this.model, this);
+    myeach(shadow.children, function(e,i) {
+        ko.applyBindings(mod, e);
+    });
+};
+XCDMAPrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+    if (name in this.model) {
+        this.model[name](newVal);
+    }
+};
+
+var XCDMA = document.registerElement("x-cdma", {
+  prototype: XCDMAPrototype
+});
+</script>
+
+
+  </body>
+</html>
