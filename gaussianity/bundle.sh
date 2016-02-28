@@ -22,3 +22,6 @@ done
 
 sed -i -e 's@\(.*script.* src="\)[^"]*/\([^"]*".*\)@\1\2@g' $inp
 sed -i -e 's@\(.*link rel=.* href="\)[^"]*/\([^"]*".*\)@\1\2@g' $inp
+
+echo "rsync -avzu $o dl@heeere.com:/var/www/dl/"
+
