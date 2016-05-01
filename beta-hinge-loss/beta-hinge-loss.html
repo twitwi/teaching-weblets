@@ -25,6 +25,16 @@ attr: {
               ">will change</x-beta-hinge>
     <br/>
     <input style="width:400px" type="range" min="0" data-bind="value: pslider, valueUpdate: 'input', attr: {max: pstep()*pmax()}"/> <br/>Beta: <span data-bind="text: pslider() / pstep()"></span>
+    <br/> <button onclick="
+$({foo:1}).animate({foo:0}, {
+    duration: 3000,
+    easing: 'linear',
+    step: function(val) {
+        var v = val * around.pstep()*around.pmax();
+        around.pslider(parseInt(v));
+    }
+})
+">anim</button>
 
     <script>
 var around = {
@@ -80,7 +90,13 @@ ko.applyBindings(around);
 }
 .grid {
     fill: none;
-    stroke-width: .1;
+    stroke-width: .05;
+    stroke: grey;
+}
+.grid2 {
+    fill: none;
+    stroke-width: .02;
+    stroke-dasharray: .1,.2;
     stroke: grey;
 }
 svg {outline: 10px solid #EEE;}
@@ -89,6 +105,8 @@ svg {outline: 10px solid #EEE;}
       <g transform="translate(0, 5) scale(1,-1)">
         <path class="grid" d="M 0 -1 L 0 10"/>
         <path class="grid" d="M -10 0 L 10 0"/>
+        <path class="grid2" d="M -1 -1 L -1 10"/>
+        <path class="grid2" d="M 1 -1 L 1 10"/>
         <g class="hinge fwdhinge">
           <path data-bind="attr: {d: hingePath}" d="M 100 0 L 0 1000"/>
         </g>
