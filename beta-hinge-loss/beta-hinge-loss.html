@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <meta charset="utf-8">
+      <script src="jquery.min.js"></script>
+      <script src="knockout-3.4.0.js"></script>
+      <script src="numeric-1.2.6.min.js"></script>
+
+  <style>
+      x-cdma {width: 400px; display: inline;}
+  </style>
+
+
+
+  </head>
+  <body>
+      <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
+
+
+      <x-beta-hinge id="gg"
+              data-bind="
+attr: {
+  beta: b,
+}
+              ">will change</x-beta-hinge>
+    <br/>
+    <input style="width:400px" type="range" min="0" data-bind="value: pslider, valueUpdate: 'input', attr: {max: pstep()*pmax()}"/> <br/>Beta: <span data-bind="text: pslider() / pstep()"></span>
+
+    <script>
+var around = {
+    _comp: document.getElementById('gg')
+};
+around.add = function(name, def) {
+    if (typeof def === 'undefined') def = 0;
+    var v = this._comp.getAttribute(name);
+    if (v == null) {
+        v = def;
+    }
+    this[name] = ko.observable(v);
+    return this;
+};
+
+around.add('pstep', 100);
+around.add('pmax', 1);
+around.add('pslider', 0.75*around.pstep());
+around.b = ko.computed(function() {
+    return this.pslider()/this.pstep();
+}, around);
+ko.applyBindings(around);
+
+    </script>
+
+
+
+<template id="tpl-beta-hinge">
+    <style>
+.betahinge {
+    stroke-width: .1;
+    fill: none;
+    stroke-dasharray: 0.1,0.2;
+    stroke: black;
+}
+.betahinge2 {
+    stroke-width: .05;
+    fill: none;
+    stroke-dasharray: 0.3,0.3;
+    stroke: black;
+}
+.hinge {
+    stroke-width: .05;
+    fill: none;
+    opacity: 0.7;
+}
+.fwdhinge {
+    stroke: blue;
+}
+.invhinge {
+    stroke: green;
+    stroke-dashoffset: 0.3;
+}
+.grid {
+    fill: none;
+    stroke-width: .1;
+    stroke: grey;
+}
+svg {outline: 10px solid #EEE;}
+    </style>
+    <svg width="800px" height="400px" viewbox="-6 -1 12 7" style="display: inline">
+      <g transform="translate(0, 5) scale(1,-1)">
+        <path class="grid" d="M 0 -1 L 0 10"/>
+        <path class="grid" d="M -10 0 L 10 0"/>
+        <g class="hinge fwdhinge">
+          <path data-bind="attr: {d: hingePath}" d="M 100 0 L 0 1000"/>
+        </g>
+        <g class="hinge invhinge">
+          <path data-bind="attr: {d: invHingePath}" d="M 100 0 L 0 1000"/>
+        </g>
+        <g class="betahinge">
+          <path data-bind="attr: {d: betaHingePath}" d="M 100 0 L 0 1000"/>
+        </g>
+        <g class="betahinge2">
+          <path data-bind="attr: {d: betaHingePath}" d="M 100 0 L 0 1000"/>
+        </g>
+      </g>
+    </svg>
+</template>
+
+<script>
+
+var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+};
+
+var XBetaHingePrototype = Object.create(HTMLElement.prototype);
+XBetaHingePrototype.createdCallback = function() {
+
+    var comp = this;
+    var tpl = document.getElementById('tpl-beta-hinge');
+    var shadow = this.createShadowRoot();
+    var node = document.importNode(tpl.content, true);
+    shadow.appendChild(node);
+
+    var add = function(name, def) {
+        var v = comp.getAttribute(name);
+        if (v == null) {
+            v = def;
+        }
+        this[name] = ko.observable(v);
+    };
+    var pathOf = function(fourValProducer, scale) {
+        return ko.computed(function() {
+            var points = [];
+            var xs = [-10, -1, 1, 10];
+            var ys = fourValProducer();
+            for (i in xs) {
+                var x = xs[i]*scale;
+                var y = ys[i]*scale;
+                points.push(x+' '+y);
+            }
+            return "M " + points.join(" L ");
+        });
+    };
+    var ViewModel = function() {
+        this.scale = 1;
+        this.add = add;
+        this.add('beta', 0.5);
+        this.hingePath = pathOf(function() {
+            var bp = this.beta();
+            return [0, 0, 2*bp, 11*bp];
+        }.bind(this), this.scale);
+        this.invHingePath = pathOf(function() {
+            var bm = 1-this.beta();
+            return [11*bm, 2*bm, 0, 0];
+        }.bind(this), this.scale);
+        this.betaHingePath = pathOf(function() {
+            var bp = this.beta();
+            var bm = 1-bp;
+            return [11*bm, 2*bm, 2*bp, 11*bp];
+        }.bind(this), this.scale);
+    };
+
+    var mod = new ViewModel();
+    this.model = mod;
+    //ko.applyBindings(this.model, this);
+    myeach(shadow.children, function(e,i) {
+        ko.applyBindings(mod, e);
+    });
+};
+XBetaHingePrototype.attributeChangedCallback = function(name, oldVal, newVal) {
+    if (name in this.model) {
+        this.model[name](newVal);
+    }
+};
+
+var XBetaHinge = document.registerElement('x-beta-hinge', {
+  prototype: XBetaHingePrototype
+});
+</script>
+
+
+  </body>
+</html>
