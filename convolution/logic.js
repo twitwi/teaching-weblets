@@ -9,7 +9,12 @@ var start = function() {
     var im = document.getElementById('image');
     var fi = document.getElementById('filter');
     var tx = document.getElementById('lastvalue');
+    var cvs = document.getElementById('cvs');
 
+    cvs.width = im.width;
+    cvs.height = im.height;
+    cvs.style.left = im.width+"px";
+    
     var showValue = function(x, y, cx, cy) {
         var v = data[y][x];
         var vcolor = (v - dataMin) / (dataMax - dataMin);
@@ -18,6 +23,11 @@ var start = function() {
         tx.style.left = cx+"px";
         tx.style.top = (cy-20)+"px";
         tx.style.color = color;
+
+        var ctx = cvs.getContext("2d");
+        ctx.fillStyle = color;
+        ctx.fillRect(cx, cy, 1, 1);
+        
     };
 
     var onMove = function(e) {
