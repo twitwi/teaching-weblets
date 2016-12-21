@@ -7,15 +7,15 @@
         <style>
             #image { position: absolute; left: 0; top: 0; }
             #filter { position: absolute; opacity: 0.6; border: 1px solid blue;}
-            #lastvalue {float: right;}
+            #lastvalue { position: absolute; color: grey;}
         </style>
     </head>
     <body>
         <div class="container">
             <img id="image" src="image.png"/>
             <img id="filter" src="filter.png"/>
+            <div id="lastvalue">lastvalue</div>
         </div>
-        <div id="lastvalue">lastvalue</div>
         <script src="conv.js"></script>
         <script src="logic.js"></script>
     </body>
