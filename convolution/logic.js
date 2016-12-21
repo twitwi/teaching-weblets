@@ -11,12 +11,14 @@ var start = function() {
         tx.textContent = data[y][x];
     };
     
-    im.onclick = function(e) {
+
+    var onMove = function(e) {
         fi.style.left = (e.clientX-fi.width/2)+"px";
         fi.style.top = (e.clientY-fi.height/2)+"px";
         showValue(e.clientX, e.clientY);
     };
-    fi.onclick = im.onclick;
+    im.addEventListener('mousemove', onMove);
+    fi.addEventListener('mousemove', onMove);
     
 };
 start();
