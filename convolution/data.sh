@@ -45,7 +45,11 @@ o = signal.convolve2d(im[:,:],
 #print(o)
 
 with open('conv.js', 'a') as outfile:
-    data = { "values": o.tolist() }
+    data = { "values": o.tolist(),
+             "min": o.min(),
+             "max": o.max(),
+             "mean": o.mean()
+           }
     json.dump(data, outfile)
 
 EOF

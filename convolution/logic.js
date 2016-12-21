@@ -1,7 +1,10 @@
 
-var data = rawConvData.values;
 
 var start = function() {
+    
+    var data = rawConvData.values;
+    var dataMin = rawConvData.min;
+    var dataMax = rawConvData.max;
     
     var im = document.getElementById('image');
     var fi = document.getElementById('filter');
@@ -10,7 +13,6 @@ var start = function() {
     var showValue = function(x, y) {
         tx.textContent = data[y][x];
     };
-    
 
     var onMove = function(e) {
         fi.style.left = (e.clientX-fi.width/2)+"px";
