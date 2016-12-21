@@ -8,12 +8,14 @@
             #image { position: absolute; left: 0; top: 0; }
             #filter { position: absolute; opacity: 0.6; border: 1px solid blue;}
             #lastvalue { position: absolute; color: grey;}
-            #cvs { position: absolute; border-left: 2px solid black;}
+            #model { position: absolute; border-left: 2px solid black; opacity: 0.05; }
+            #cvs { position: absolute; border-left: 2px solid black; opacity: 0.8; }
         </style>
     </head>
     <body>
-        <div class="container">
+        <div class="container" id="cont">
             <img id="image" src="image.png"/>
+            <img id="model" src="image.png"/>
             <img id="filter" src="filter.png"/>
             <div id="lastvalue">lastvalue</div>
             <canvas id="cvs"/>
