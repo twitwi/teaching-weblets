@@ -77,8 +77,7 @@
     }
   });
 
-  function startApp() {
-    console.log("START", document.querySelector('#svgObject').contentDocument)
+function startApp() {
 
   var [initColors, template] = (()=>{
     var c2h = (c) => {
@@ -97,6 +96,7 @@
     toReplace.parentElement.replaceChild(svgObject, toReplace);
 
     ddoc.querySelector('svg').setAttribute('v-on:dragstart.prevent', '')
+    ddoc.querySelector('svg image').style.imageRendering = 'optimizeQuality';
     var pathSelector = 'path';
     paths = ddoc.querySelectorAll(pathSelector);
     var colors = Array.from(paths).map(h=>({hex: eval(h.style.fill)}));
@@ -106,9 +106,6 @@
     return [colors, ddoc.innerHTML];
   })();
 
-  console.log(JSON.stringify(initColors))
-
-  console.log(VueColor)
   Vue.component('color-svg', {
     template,
     compiled: function() {
@@ -116,7 +113,6 @@
       console.log("COMPILED", (this.$el))
     },
     data: (a)=> {
-      console.log("GO", this, a);
       return {
         bgColor: {
           hex: '#BBB'
