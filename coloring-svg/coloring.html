@@ -110,9 +110,10 @@ function startApp() {
     toReplace.parentElement.replaceChild(svgObject, toReplace);
 
     ddoc.querySelector('svg').setAttribute('v-on:dragstart.prevent', '')
-    ddoc.querySelector('svg image').style.imageRendering = 'optimizeQuality';
+    ddoc.querySelectorAll('svg image').forEach( (e) => e.style.imageRendering = 'optimizeQuality' );
+    ddoc.querySelectorAll('svg image').forEach( (e) => e.setAttribute(':style', "{filter: `invert(${invertImage ? 100 : 0}%)`}") );
     var pathSelector = 'path';
-    paths = ddoc.querySelectorAll(pathSelector);
+    var paths = Array.from(ddoc.querySelectorAll(pathSelector));
     var colors = Array.from(paths).map(h=>({hex: eval(h.style.fill)}));
     paths.forEach( (e,i) => {
       e.setAttribute(':style', `{fill: colors[${i}].hex}`)
@@ -128,6 +129,7 @@ function startApp() {
     },
     data: (a)=> {
       return {
+        invertImage: false,
         bgColor: {
           hex: '#BBB'
         },
@@ -141,7 +143,7 @@ function startApp() {
     }
   });
 
-  var app = new Vue({
+  window.app = new Vue({
     el: '#app',
   });
 }
