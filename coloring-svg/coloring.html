@@ -21,8 +21,19 @@
   }
   .pickers {
     position: absolute;
+    height: 100%;
+    width: var(--margin);
+    border: 1px solid red;
+    overflow: hidden;
   }
-  .pickers div {
+  .pickers2 {
+    height: 100%;
+    width: var(--margin);
+    padding-right: 10px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+  }
+  .pickers2 div {
     float: left;
     width: var(--margin);
     clear: both;
@@ -37,12 +48,15 @@
   <script type="text/x-template" id="tpl-thesvg">
     <div class="all" :style="{background: bgColor.hex}" @dragstart.prevent>
       <div class="pickers">
+      <div class="pickers2">
+        <input type="checkbox" v-model="invertImage"></input>
         <div>
           <mypicker v-model="bgColor"/>
         </div>
         <div v-for="(co, i) in colors">
           <mypicker v-model="colors[i]"/>
         </div>
+      </div>
       </div>
       <svg id="replaceBySvgObject"></svg>
     </div>
