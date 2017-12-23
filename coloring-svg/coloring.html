@@ -5,6 +5,7 @@
   <script src="vue-color.min.js"></script>
 
   <style>
+  /*svg *:nth-child(n+1) {display: none;}*/
   :root {
     --margin: 150px;
   }
@@ -45,7 +46,7 @@
           <mypicker v-model="colors[i]"/>
         </div>
       </div>
-      <svg @dragstart.prevent
+      <svg
          xmlns:dc="http://purl.org/dc/elements/1.1/"
          xmlns:cc="http://creativecommons.org/ns#"
          xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -57,24 +58,20 @@
          viewBox="0 0 1872 2496">
         <path
            style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#13bfff;fill-opacity:1;fill-rule:nonzero;stroke:#008000;stroke-width:0.09770709px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-           :style="{fill: colors[0].hex}"
            d="M 994.64844 428.17969 C 912.53282 427.68173 842.73071 456.69787 770.50586 495.88477 C 728.79214 518.5173 681.2864 553.27045 642.98633 588.80078 C 546.28917 678.5051 497.32422 793.60544 497.32422 925.50391 C 497.32423 1057.4024 549.72003 1183.8979 642.98633 1277.1641 C 720.38868 1354.5665 785.15566 1398.2125 892.42578 1412.7285 C 899.31635 1413.6609 916.96688 1420.4284 933.10742 1425.1328 L 891.81836 1480.7871 L 874.99023 1516.3086 L 882.46875 1542.4844 L 908.64453 1557.4414 L 966.60352 1574.2676 L 1002.127 1596.7031 L 1041.3887 1611.6602 L 1078.7812 1613.5312 L 1101.2168 1587.3555 L 1091.8691 1535.0059 L 1033.9102 1488.2656 L 994.64844 1456.4805 L 985.29883 1424.6973 L 985.1582 1424.4355 C 988.24738 1423.5072 991.29158 1422.8281 994.64844 1422.8281 C 1126.5469 1422.8281 1253.0423 1370.4304 1346.3086 1277.1641 C 1392.5528 1230.92 1443.7055 1189.5952 1468.4492 1130.4043 C 1493.6091 1070.2175 1491.9707 992.00329 1491.9707 925.50391 C 1491.9707 793.60544 1439.5749 667.11006 1346.3086 573.84375 C 1253.0423 480.57745 1126.5445 428.97952 994.64844 428.17969 z "
            id="path817" />
         <path
            style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           :style="{fill: colors[1].hex}"
            d="m 1003.9958,579.62077 -57.95883,7.47855 -29.91422,16.82675 -14.9571,50.48023 5.60891,57.95879 67.30698,222.48695 52.34986,43.00168 89.7426,22.43568 82.2641,-18.6964 86.0034,-50.48023 35.5231,-67.30698 -39.2624,-112.1783 -56.0891,-41.13204 -57.9588,-18.69638 -80.3945,14.9571 -14.9571,-93.48191 z"
            id="path823"
            inkscape:connector-curvature="0" />
         <path
            style="fill:#ffa2c9;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1"
-           :style="{fill: colors[2].hex}"
            d="m 602.02352,871.28434 -59.82842,26.17494 -22.43566,35.52313 7.47855,31.78385 33.65349,50.48024 46.74096,26.1749 74.78553,14.9571 74.78553,-5.6089 54.21951,-18.6964 43.00168,-48.61056 14.95711,-31.78385 -97.22119,-11.21783 -84.13373,-28.04458 z"
            id="path825"
            inkscape:connector-curvature="0" />
         <path
            style="fill:#ff6600;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           :style="{fill: colors[3].hex}"
            d="M 729.1582 529.14062 C 609.89565 615.75 541.25241 714.27014 506.67188 820.80469 L 749.72461 932.98242 L 813.29297 938.5918 L 863.33398 937.42773 L 854.42383 983.46289 L 811.42383 1032.0723 L 863.77344 1052.6387 L 932.94922 1045.1602 L 975.95117 1018.9863 L 992.77734 968.50586 L 960.39453 935.16992 L 974.08203 934.85156 L 921.73242 753.49805 L 869.38086 663.75391 L 798.33594 574.01172 L 729.1582 529.14062 z "
            id="path827" />
         <image
@@ -116,7 +113,7 @@
     }
   });
 
-  var initColors = (()=>{
+  var [initColors, template] = (()=>{
     var c2h = (c) => {
       var hex = c.toString(16);
       return hex.length == 1 ? "0" + hex : hex;
@@ -126,15 +123,25 @@
 
     var ddoc = document.createElement('div');
     ddoc.innerHTML = document.querySelector('#tpl-thesvg').innerHTML;
-    return Array.from(ddoc.querySelectorAll('path')).map(h=>({hex: eval(h.style.fill)}));
+    var pathSelector = "path";
+    ddoc.querySelector('svg').setAttribute('v-on:dragstart.prevent', '')
+    paths = ddoc.querySelectorAll(pathSelector);
+    var colors = Array.from(paths).map(h=>({hex: eval(h.style.fill)}));
+    paths.forEach( (e,i) => {
+      e.setAttribute(':style', `{fill: colors[${i}].hex}`)
+    });
+    return [colors, ddoc.innerHTML];
   })();
 
   console.log(JSON.stringify(initColors))
 
   console.log(VueColor)
   Vue.component('color-svg', {
-    template: '#tpl-thesvg',
-    props: ['selector', 'file'],
+    template,
+    compiled: function() {
+      alert("comp")
+      console.log("COMPILED", (this.$el))
+    },
     data: (a)=> {
       console.log("GO", this, a);
       return {
