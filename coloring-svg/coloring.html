@@ -50,6 +50,7 @@
       <div class="pickers">
       <div class="pickers2">
         <input type="checkbox" v-model="invertImage"></input>
+        <input type="checkbox" v-model="mirrorImage"></input>
         <div>
           <mypicker v-model="bgColor"/>
         </div>
@@ -105,6 +106,7 @@ function startApp() {
     var svgObject = document.querySelector('#svgObject').contentDocument.rootElement;
     svgObject.removeAttribute('width');
     svgObject.removeAttribute('height');
+    svgObject.setAttribute(':style', "{transform: `scale(${mirrorImage ? '-' : ''}1, 1)`}")
     var toReplace = ddoc.querySelector('#replaceBySvgObject');
     toReplace.parentElement.replaceChild(svgObject, toReplace);
 
@@ -129,6 +131,7 @@ function startApp() {
     data: (a)=> {
       return {
         invertImage: false,
+        mirrorImage: false,
         bgColor: {
           hex: '#BBB'
         },
