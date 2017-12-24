@@ -114,7 +114,7 @@ function startApp() {
     ddoc.querySelector('svg').setAttribute('v-on:dragstart.prevent', '')
     ddoc.querySelectorAll('svg image').forEach( (e) => e.style.imageRendering = 'optimizeQuality' );
     ddoc.querySelectorAll('svg image').forEach( (e) => e.setAttribute(':style', "{filter: `invert(${invertImage ? 100 : 0}%)`}") );
-    var pathSelector = 'path';
+    var pathSelector = 'path:not([id^="NO"])';
     var paths = Array.from(ddoc.querySelectorAll(pathSelector));
     var colors = Array.from(paths).map(h=>({hex: eval(h.style.fill)}));
     paths.forEach( (e,i) => {
