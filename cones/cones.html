@@ -7,6 +7,9 @@
   <!--script src="vue-color.min.js"></script-->
 
   <style>
+  .editpoint {
+    border: 1px solid black;
+  }
   .withaxes {
     border: 2px solid black;
     border-width: 0 0 2px 2px;
@@ -22,9 +25,17 @@
   }
   .shade {
     fill: #0000007F;
+    transition: fill 500ms;
+  }
+  .shade.highlight {
+    fill: #0000FF7F;
   }
   .lowershade {
     fill: #0000002F;
+  }
+  .details {
+    overflow-y: scroll;
+    max-height: 300px;
   }
   </style>
 
@@ -38,16 +49,30 @@
   <div id="app">
     <div class="all">
       <svg class="withaxes">
-        <g v-for="o in fullPoints" :transform="'translate('+o.t*200+', '+(400-400*o.f)+')'">
+        <g v-for="(o, i) in fullPoints" :transform="'translate('+o.t*200+', '+(400-400*o.f)+')'">
           <rect class="point" x="-2" y="-2" width="4" height="4"/>
-          <path class="shade" :d="'M 0 0 L '+(-400/o.slope)+' -400 l '+(2*400/o.slope)+' 0 Z'"/>
+          <path :class="{shade: true, highlight: i==currentIndex}" :d="'M 0 0 L '+(-400/o.slope)+' -400 l '+(2*400/o.slope)+' 0 Z'"/>
         </g>
         <path class="lowershade" :d="'M 0 400 l 0 '+(-400*bestF)+' l 400 0 L 400 400 Z'"/>
       </svg>
       <br/> P = <input type="number" v-model="P"/>
       <br/> N = <input type="number" v-model="N"/>
-      <br/> β = <input type="range" min="0.01" max="5" step="0.01" v-model="beta"/> ({{beta}})
+      <br/> β = <input type="range" min="0.01" max="5" step="0.01" v-model.number="beta"/> ({{beta}})
       <br/> <label><input id="focus" type="checkbox" v-model="enhance"/> enhanced</label>
+      <div class="details">
+        Grid with random:
+        <a @click="loadGrid(29)">(29)</a>
+        <a @click="loadGrid(19)">(19)</a>
+        <a @click="loadGrid(9)">(9)</a>
+        <a @click="loadGrid(5)">(5)</a>
+        <div class="editpoint" v-for="(p, i) in points" @mouseover="setCurrentIndex(i)">
+          t: <input type="range" min="0" max="2" step="0.01" v-model.number="p.t"/> ({{p.t}})
+          <br/> FP: <input type="range" min="0" :max="N" step="1" v-model.number="p.fp"/> ({{p.fp}})
+          <br/> FN: <input type="range" min="0" :max="P" step="1" v-model.number="p.fn"/> ({{p.fn}})
+          <a @click="deletePoint(i)">(delete)</a>
+        </div>
+        <a @click="addPoint()">(new)</a>
+      </div>
     </div>
   </div>
 
@@ -77,6 +102,7 @@ function startApp() {
   window.app = new Vue({
     el: '#app',
     data: {
+      currentIndex: -1,
       enhance: false,
       P: 100,
       N: 1000,
@@ -90,7 +116,29 @@ function startApp() {
       ],
     },
     methods: {
-      toggleEnhance() { this.enhance = !this.enhance; }
+      toggleEnhance() { this.enhance = !this.enhance; },
+      deletePoint(i) {
+        this.points.splice(i, 1);
+      },
+      addPoint() {
+        this.points.push({
+          t: Math.random()*2,
+          fp: parseInt(Math.random()*this.N),
+          fn: parseInt(Math.random()*this.P)
+        });
+      },
+      loadGrid(n) {
+        let R = .05;
+        this.points = Array.from(Array(n).keys()).map( (i)=>({
+          t: 2*(0.01+i/(n-1)*.99),
+          fp: parseInt((Math.random()*R+R)*this.N),
+          fn: parseInt((Math.random()*R+R)*this.P),
+        }));
+      },
+      setCurrentIndex(i) {
+        console.log(this.currentIndex, i);
+        this.currentIndex = i;
+      }
     },
     computed: {
       theirs: function() { return !this.enhance; },
