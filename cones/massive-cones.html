@@ -37,7 +37,8 @@
     overflow-y: scroll;
     max-height: 300px;
   }
-  .sets>a:not(.currentSet) { text-decoration: underline; }
+  .sets>a { color: black; }
+  .sets>a.currentSet { text-decoration: none; border-bottom: 3px solid red; }
   </style>
 
 </head>
@@ -57,7 +58,8 @@
         <path class="lowershade" :d="'M 0 400 l 0 '+(-400*bestF)+' l 400 0 L 400 400 Z'"/>
       </svg>
       <div class="sets">
-        <a v-for="i in Array.from(Array(nSets).keys())" :class="{currentSet: i==currentSet}" @click="setSet(i)">[{{i}}]</a>
+        <a v-for="i in Array.from(Array(nSets).keys())" :class="{currentSet: i==currentSet}"
+           href="" @click.prevent="setSet(i)">[{{i}}]</a>
         <a href="" @click.prevent="setSet((currentSet-1+nSets)%nSets)">«</a>
         <a href="" @click.prevent="setSet((currentSet+1)%nSets)">»</a>
       </div>
