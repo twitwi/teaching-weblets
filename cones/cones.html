@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"></meta>
+
+  <script src="vue.js"></script>
+  <!--script src="vue-color.min.js"></script-->
+
+  <style>
+  .withaxes {
+    border: 2px solid black;
+    border-width: 0 0 2px 2px;
+  }
+  .withaxes {
+    width: 400px;
+    height: 400px;
+  }
+  .point {
+    fill: none;
+    stroke: black;
+    stroke-width: 1;
+  }
+  .shade {
+    fill: #0000007F;
+  }
+  </style>
+
+</head>
+<body>
+
+
+  <script type="text/x-template" id="tpl-thesvg">
+  </script>
+
+  <div id="app" @key.shift="toggleEnhance">
+    <div class="all">
+      <svg class="withaxes">
+        <g v-for="o in fullPoints" :transform="'translate('+o.t*200+', '+(400-400*o.f)+')'">
+          <rect class="point" x="-2" y="-2" width="4" height="4"/>
+          <path class="shade" :d="'M 0 0 L '+(-400/o.slope)+' -400 l '+(2*400/o.slope)+' 0 Z'"/>
+        </g>
+      </svg>
+      <br/> P = <input type="number" v-model="P"/>
+      <br/> N = <input type="number" v-model="N"/>
+      <br/> β = <input type="range" min="0.01" max="5" step="0.01" v-model="beta"/> ({{beta}})
+      <br/> <label><input type="checkbox" v-model="enhance"/> enhanced</label>
+    </div>
+  </div>
+
+<!-- pointer-events none on the png image -->
+
+
+  <script>
+  var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+  };
+
+
+function startApp() {
+
+  Vue.component('cone', {
+    template: '#tpl-thesvg',
+    compiled: function() {
+      alert("comp")
+      console.log("COMPILED", (this.$el))
+    },
+    methods: {
+    }
+  });
+
+  window.app = new Vue({
+    el: '#app',
+    data: {
+      enhance: false,
+      P: 100,
+      N: 1000,
+      beta: 1,
+      points: [
+        {t: .2, fp: 30, fn: 20},
+        {t: .6, fp: 20, fn: 20},
+        {t: 1, fp: 100, fn: 50},
+        {t: 1.3, fp: 50, fn: 80},
+        {t: 1.35, fp: 500, fn: 30},
+      ],
+    },
+    methods: {
+      toggleEnhance() { this.enhance = !this.enhance; }
+    },
+    computed: {
+      theirs: function() { return !this.enhance; },
+      M: function() {
+        return Math.sqrt(this.P*this.P + this.N*this.N);
+      },
+      phi: function() {
+        return 1/(this.beta*this.beta*this.P);
+      },
+      fullPoints: function() {
+        return this.points.map( o=> {
+          var normE = Math.sqrt(o.fp*o.fp + o.fn*o.fn);
+          var tp = this.P - o.fn;
+          var tn = this.N - o.fp;
+          var f = (1+this.beta)*tp / ((1+this.beta)*tp + this.beta*o.fn + o.fp);
+          var slope;
+          if (this.theirs) {
+            slope = 2 * 2 * this.M * this.phi;
+          } else {
+            slope = Math.sqrt(2) * (normE*2) * this.phi;
+          }
+          var res = {...o, tp, tn, f, slope};
+          console.log(res);
+          return res;
+        });
+      }
+    },
+  });
+}
+startApp();
+  </script>
+
+</body>
+</html>
