@@ -159,11 +159,11 @@ function startApp() {
             let e2 = o.fp;
 
             let N1a2 = -e2;
-            let N1a1 = N1a2*(this.P - e1) / (this.P + e2);
+            let N1a1 = -N1a2*(this.P - e1) / (this.P + e2);
             let N1n = l2norm(e1 + N1a1, e2 + N1a2);
 
             let N2a2 = Math.min(this.N - e2, e1*(this.P + e2) / (this.P - e1));
-            let N2a1 = N1a2*(this.P - e1) / (this.P + e2);
+            let N2a1 = -N1a2*(this.P - e1) / (this.P + e2);
             let N2n = l2norm(e1 + N2a1, e2 + N2a2);
 
             var normErestricted = Math.max(N1n, N2n);
