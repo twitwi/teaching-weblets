@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"></meta>
+
+  <script src="vue.js"></script>
+
+  <style>
+  .textRepresentation {
+    height: 200px;
+    width: 400px;
+  }
+  .layer.input { font-family: monospace; }
+  .layer.weights { color: darkblue; }
+  .layer.aggregation { color: darkred; }
+  .layer.activation { color: darkgrey; }
+  /* */
+  .button {
+  	display: inline-block;
+  	text-align: center;
+  	margin: 0;
+  	padding: .3em .9em;
+  	vertical-align: middle;
+  	background: #0074d9;
+  	color: #fff;
+  	border: 0;
+  	border-radius: .2em;
+  	width: auto;
+  }
+  .toggleNext {
+    display: none;
+  }
+  .toggleNext:not(:checked)+* {
+    display: none;
+  }
+  </style>
+
+</head>
+<body>
+
+  <div id="app">
+    <textarea class="textRepresentation" v-model="textRepresentation"></textarea>
+
+    <br/>
+    <label for="layersCB" class="button">Analysis of Parameters</label>
+    <input class="toggleNext" id="layersCB" type="checkbox"></input>
+    <div class="layers">
+      <div v-for="(l, i) in allLayers" :class="['layer', l.type]">{{l.name}} with {{l.nParameters}} parameters (including {{l.nBiases}} biases)</div>
+      <div class="total">For a total of {{totalParameters}} params (including {{totalBiases}}) biases).</div>
+    </div>
+
+    <br/>
+    <label for="fovCB" class="button">Field of View</label>
+    <input class="toggleNext" id="fovCB" type="checkbox" checked></input>
+    <div class="fovs">
+      <div v-for="(l, i) in allLayers" :class="['layer', l.type]">Overall field of view of {{l.fov.join('×')}} on {{l.name}}</div>
+    </div>
+
+    <br/>
+    <label for="featsCB" class="button">Feature Maps</label>
+    <input class="toggleNext" id="featsCB" type="checkbox" checked></input>
+    <div class="feats">
+      <div v-for="(l, i) in allLayers" :class="['layer', l.type]">Feature maps after {{l.name}} {{l.feats.join('×')}}</div>
+    </div>
+
+
+  <script>
+var myeach = function(coll, cb) {
+  [].forEach.call(coll, cb);
+};
+function Scope() {
+  "use strict";
+  this.names = [];
+  this.eval = function(s) { return eval(s); };
+  this.evalCreate = function(s) {
+    var newName = s.substr(0, s.indexOf('='));
+    var code = "(function() {\n";
+    code += 'var ' + newName + ' = null;\n';
+    code += s + ';\n';
+    code += 'return function(str) {return eval(str)};\n})()';
+    console.log(code);
+    this.eval = this.eval(code);
+  };
+}
+
+function l2norm(x, y) {
+  return Math.sqrt(x*x + y*y);
+}
+function layer__(name='default', type='unspecified', override={}, nParameters=0, nBiases=0) {
+  var updateFov = fov=>fov;
+  var updateFeats = feats=>feats;
+  return {name, type, nParameters, nBiases, updateFov, updateFeats, ...override};
+}
+const fovMulAdd = (sw,sh,aw=0,ah=0) => ([fw, fh]) => [fw*sw+aw, fh*sh+ah];
+const layer__image = (d,w,h) => layer__('image', 'input', {d,w,h, updateFeats:_=>[d,w,h]});
+const layer__vector = (d) => layer__('vector', 'input', {d, updateFeats:_=>[d,1,1]});
+const layer__conv = (nin, nout, w, h) => layer__('conv', 'weights', {nin, nout, w, h, updateFov:fovMulAdd(1, 1, w-1, h-1), updateFeats:([d,iw,ih])=>[nout,iw+1-w,ih+1-h]}, nout*(1+nin*w*h), nout);
+const layer__convpad = (nin, nout, w, h) => layer__('conv', 'weights', {nin, nout, w, h, updateFov:fovMulAdd(1, 1, w-1, h-1), updateFeats:([d,iw,ih])=>[nout,iw,ih]}, nout*(1+nin*w*h), nout);
+const layer__fc = (nin, nout) => layer__('fc', 'weights', {nin, nout, updateFeats:([d,iw,ih])=>[nout,iw,ih]}, nout*(1+nin), nout);
+const layer__relu = () => layer__('relu', 'activation');
+const layer__activ = () => layer__('activ', 'activation');
+const layer__softmax = () => layer__('softmax', 'activation');
+const layer__downpool = (w, h) => layer__('pooling', 'aggregation', {w, h, updateFov:fovMulAdd(w, h), updateFeats:([d,iw,ih])=>[d,iw/w,ih/h]});
+const sum = (arr) => arr.reduce((a,b)=>a+b);
+
+// https://arxiv.org/pdf/1707.09725.pdf#page=104
+const presets = {
+  randomFC: ['vector(28*28)', 'fc(784, 256)', 'relu()', 'fc(256, 512)', 'relu()', 'fc(512, 10)', 'softmax()'].join("\n"),
+  random: ['image(1,28,28)', 'conv(1,8,3,3)', 'relu()', 'conv(8,32,3,3)', 'relu()', 'downpool(2,2)', 'conv(8,32,3,3)', 'relu()'].join("\n"),
+  lenetlike: ['image(1,32,32)', 'conv(1,6,5,5)', 'activ()', 'downpool(2,2)',
+                                'conv(6,16,5,5)', 'activ()', 'downpool(2,2)',
+                                'conv(16,120,5,5)', 'activ()', 'fc(120,84)', 'activ()', 'fc(84,10)', 'softmax()'].join("\n"),
+  vgg16: ['image(3,224,224)', 'convpad(3,64,3,3)\nrelu()', 'convpad(64,64,3,3)\nrelu()', 'downpool(2,2)',
+                              'convpad(64,128,3,3)\nrelu()', 'convpad(128,128,3,3)\nrelu()', 'downpool(2,2)',
+                              'convpad(128,256,3,3)\nrelu()', 'convpad(256,256,3,3)\nrelu()', 'convpad(256,256,3,3)\nrelu()', 'downpool(2,2)',
+                              'convpad(256,512,3,3)\nrelu()', 'convpad(512,512,3,3)\nrelu()', 'convpad(512,512,3,3)\nrelu()', 'downpool(2,2)',
+                              'convpad(512,512,3,3)\nrelu()', 'convpad(512,512,3,3)\nrelu()', 'convpad(512,512,3,3)\nrelu()', 'downpool(2,2)',
+                              'conv(512,4096,7,7)', 'relu()', 'fc(4096,4096)', 'relu()', 'fc(4096,1000)', 'softmax()'].join("\n"),
+};
+
+function startApp() {
+  window.app = new Vue({
+    el: '#app',
+    data: {
+      presets,
+      textRepresentation: presets.vgg16,
+    },
+    computed: {
+      allLayers: function() {
+        var scope = new Scope();
+        var layers = this.textRepresentation.split('\n').filter( txt => {
+          var fEq = txt.indexOf('=');
+          var fPar = txt.indexOf('(');
+          if (fPar==-1 || (fEq>-1 && fEq<fPar)) {
+            scope.evalCreate(txt);
+            return false;
+          } else {
+            return true;
+          }
+        }).map(txt => scope.eval('layer__'+txt));
+        var fov = [1, 1]; // w,h
+        for (var i = layers.length-1; i>=0; i--) {
+          layers[i].fov = [...fov];
+          fov = layers[i].updateFov(fov);
+        }
+        var feats = [0, 0, 0]; // d, w, h
+        for (i = 0; i < layers.length; i++) {
+          feats = layers[i].updateFeats(feats);
+          layers[i].feats = [...feats];
+        }
+        return layers;
+      },
+      totalParameters: function() {
+        return sum(this.allLayers.map(l=>l.nParameters));
+      },
+      totalBiases: function() {
+        return sum(this.allLayers.map(l=>l.nBiases));
+      },
+    },
+    methods: {
+      toggleEnhance() { this.enhance = !this.enhance; },
+    },
+    //document.getElementById('focus').focus();
+  });
+};
+
+startApp();
+  </script>
+
+</body>
+</html>
