@@ -78,6 +78,7 @@
 
 <!-- pointer-events none on the png image -->
 
+  <object data="adult_fold0_trainset/points_adult_C12.json" onload="startApp()" onerror="startApp()" id="JSON" type="text/plain" style="display:none"></object>
 
   <script>
   var myeach = function(coll, cb) {
@@ -99,6 +100,16 @@ function startApp() {
     }
   });
 
+  var loadedInfo = {};
+  try {
+  let external = document.querySelector('#JSON').contentDocument.body;
+  let pre = external.querySelector('pre');
+  loadedInfo = JSON.parse(pre.textContent);
+  console.log(loadedInfo);
+  } catch (e) {
+  console.log("Could not load external JSON", e);
+  }
+  
   window.app = new Vue({
     el: '#app',
     data: {
@@ -114,6 +125,7 @@ function startApp() {
         {t: 1.3, fp: 50, fn: 80},
         {t: 1.35, fp: 500, fn: 30},
       ],
+      ...loadedInfo
     },
     methods: {
       toggleEnhance() { this.enhance = !this.enhance; },
@@ -133,6 +145,11 @@ function startApp() {
           t: 2*(0.01+i/(n-1)*.99),
           fp: parseInt((Math.random()*R+R)*this.N),
           fn: parseInt((Math.random()*R+R)*this.P),
+        }));
+        this.points = Array.from(Array(n).keys()).map( (i)=>({
+          t: 2*(0.01+i/(n-1)*.99),
+          fp: parseInt((n-i)/(n-1)/3*this.N),
+          fn: parseInt((i)/(n-1)/3*this.P),
         }));
       },
       setCurrentIndex(i) {
@@ -184,9 +201,10 @@ function startApp() {
       },
     },
   });
+  //app.loadGrid(19);
   document.getElementById('focus').focus();
 }
-startApp();
+//startApp();
   </script>
 
 </body>
