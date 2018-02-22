@@ -77,7 +77,7 @@
           t: <input type="range" min="0" max="2" step="0.01" v-model.number="p.t"/> ({{p.t}})
           <br/> FP: <input type="range" min="0" :max="N" step="1" v-model.number="p.fp"/> ({{p.fp}})
           <br/> FN: <input type="range" min="0" :max="P" step="1" v-model.number="p.fn"/> ({{p.fn}})
-          <a @click="deletePoint(i)">(delete)</a>
+          <a @click="deletePoint(i)">(delete)</a> F={{fullPoints[i].f}}
         </div>
         <a @click="addPoint()">(new)</a>
       </div>
