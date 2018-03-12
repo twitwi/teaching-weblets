@@ -196,28 +196,6 @@ var app = new Vue({
   })
 });
 
-/*
-var around = {
-    _comp: document.getElementById('gg')
-};
-around.add = function(name, def) {
-    if (typeof def === 'undefined') def = 0;
-    var v = this._comp.getAttribute(name);
-    if (v == null) {
-        v = def;
-    }
-    this[name] = ko.observable(v);
-    return this;
-};
-around.add('cxx').add('cyy').add('cxy1000', 750).add('constx').add('consty');
-around.maxcxy = ko.computed(function() {
-    return 1; //Math.sqrt(this.cxx() * this.cyy());
-}, around);
-around.cxy = ko.computed(function() {
-    return (500 - this.cxy1000())/500 * this.maxcxy(); //Math.sqrt(this.cxx() * this.cyy());
-}, around);
-ko.applyBindings(around);
-*/
     </script>
 
 
