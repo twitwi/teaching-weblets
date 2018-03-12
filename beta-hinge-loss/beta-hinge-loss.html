@@ -1,68 +1,11 @@
 <!DOCTYPE html>
 <html>
-  <head>
-      <meta charset="utf-8">
-      <script src="jquery.min.js"></script>
-      <script src="knockout-3.4.0.js"></script>
-      <script src="numeric-1.2.6.min.js"></script>
+<head>
+    <meta charset="utf-8">
+    <script src="../lib/numeric-1.2.6.min.js"></script>
+    <script src="../lib/vue.min.js"></script>
+    <script src="../lib/TweenMax.min.js"></script>
 
-  <style>
-      x-cdma {width: 400px; display: inline;}
-  </style>
-
-
-
-  </head>
-  <body>
-      <script> if (typeof document.body.createShadowRoot === 'undefined') alert('createShadowRoot not found. Did you enable webcomponents?') </script>
-
-
-      <x-beta-hinge id="gg"
-              data-bind="
-attr: {
-  beta: b,
-}
-              ">will change</x-beta-hinge>
-    <br/>
-    <input style="width:400px" type="range" min="0" data-bind="value: pslider, valueUpdate: 'input', attr: {max: pstep()*pmax()}"/> <br/>Beta: <span data-bind="text: pslider() / pstep()"></span>
-    <br/> <button onclick="
-$({foo:1}).animate({foo:0}, {
-    duration: 3000,
-    easing: 'linear',
-    step: function(val) {
-        var v = val * around.pstep()*around.pmax();
-        around.pslider(parseInt(v));
-    }
-})
-">anim</button>
-
-    <script>
-var around = {
-    _comp: document.getElementById('gg')
-};
-around.add = function(name, def) {
-    if (typeof def === 'undefined') def = 0;
-    var v = this._comp.getAttribute(name);
-    if (v == null) {
-        v = def;
-    }
-    this[name] = ko.observable(v);
-    return this;
-};
-
-around.add('pstep', 100);
-around.add('pmax', 1);
-around.add('pslider', 0.75*around.pstep());
-around.b = ko.computed(function() {
-    return this.pslider()/this.pstep();
-}, around);
-ko.applyBindings(around);
-
-    </script>
-
-
-
-<template id="tpl-beta-hinge">
     <style>
 .betahinge {
     stroke-width: .1;
@@ -100,100 +43,85 @@ ko.applyBindings(around);
     stroke: grey;
 }
 svg {outline: 10px solid #EEE;}
-    </style>
-    <svg width="800px" height="400px" viewbox="-6 -1 12 7" style="display: inline">
-      <g transform="translate(0, 5) scale(1,-1)">
-        <path class="grid" d="M 0 -1 L 0 10"/>
-        <path class="grid" d="M -10 0 L 10 0"/>
-        <path class="grid2" d="M -1 -1 L -1 10"/>
-        <path class="grid2" d="M 1 -1 L 1 10"/>
-        <g class="hinge fwdhinge">
-          <path data-bind="attr: {d: hingePath}" d="M 100 0 L 0 1000"/>
-        </g>
-        <g class="hinge invhinge">
-          <path data-bind="attr: {d: invHingePath}" d="M 100 0 L 0 1000"/>
-        </g>
-        <g class="betahinge">
-          <path data-bind="attr: {d: betaHingePath}" d="M 100 0 L 0 1000"/>
-        </g>
-        <g class="betahinge2">
-          <path data-bind="attr: {d: betaHingePath}" d="M 100 0 L 0 1000"/>
-        </g>
-      </g>
-    </svg>
-</template>
+</style>
+
+
+
+</head>
+<body>
+
+    <div id="bhinge">
+        <beta-hinge id="bh" :beta="b1000 / bstep"></beta-hinge>
+        <br/>
+        <input style="width:400px" type="range" min="0" max="1000"
+        v-model="b1000"/> β = {{(b1000 / bstep).toFixed(3)}}
+        <br/> <button @click="animateBeta">anim</button>
+    </div>
+
+    <script type="text/x-template" id="tpl-beta-hinge">
+        <svg width="800px" height="400px" viewBox="-6 -1 12 7" style="display: inline">
+            <g transform="translate(0, 5) scale(1,-1)">
+                <path class="grid" d="M 0 -1 L 0 10"/>
+                <path class="grid" d="M -10 0 L 10 0"/>
+                <path class="grid2" d="M -1 -1 L -1 10"/>
+                <path class="grid2" d="M 1 -1 L 1 10"/>
+                <g class="hinge fwdhinge">
+                    <path :d="hingePath"/>
+                </g>
+                <g class="hinge invhinge">
+                    <path :d="invHingePath"/>
+                </g>
+                <g class="betahinge">
+                    <path :d="betaHingePath"/>
+                </g>
+                <g class="betahinge2">
+                    <path :d="betaHingePath"/>
+                </g>
+            </g>
+        </svg>
+    </script>
+
 
 <script>
-
-var myeach = function(coll, cb) {
-    [].forEach.call(coll, cb);
-};
-
-var XBetaHingePrototype = Object.create(HTMLElement.prototype);
-XBetaHingePrototype.createdCallback = function() {
-
-    var comp = this;
-    var tpl = document.getElementById('tpl-beta-hinge');
-    var shadow = this.createShadowRoot();
-    var node = document.importNode(tpl.content, true);
-    shadow.appendChild(node);
-
-    var add = function(name, def) {
-        var v = comp.getAttribute(name);
-        if (v == null) {
-            v = def;
-        }
-        this[name] = ko.observable(v);
-    };
-    var pathOf = function(fourValProducer, scale) {
-        return ko.computed(function() {
-            var points = [];
-            var xs = [-10, -1, 1, 10];
-            var ys = fourValProducer();
-            for (i in xs) {
-                var x = xs[i]*scale;
-                var y = ys[i]*scale;
-                points.push(x+' '+y);
-            }
-            return "M " + points.join(" L ");
-        });
-    };
-    var ViewModel = function() {
-        this.scale = 1;
-        this.add = add;
-        this.add('beta', 0.5);
-        this.hingePath = pathOf(function() {
-            var bp = this.beta();
-            return [0, 0, 2*bp, 11*bp];
-        }.bind(this), this.scale);
-        this.invHingePath = pathOf(function() {
-            var bm = 1-this.beta();
-            return [11*bm, 2*bm, 0, 0];
-        }.bind(this), this.scale);
-        this.betaHingePath = pathOf(function() {
-            var bp = this.beta();
-            var bm = 1-bp;
-            return [11*bm, 2*bm, 2*bp, 11*bp];
-        }.bind(this), this.scale);
-    };
-
-    var mod = new ViewModel();
-    this.model = mod;
-    //ko.applyBindings(this.model, this);
-    myeach(shadow.children, function(e,i) {
-        ko.applyBindings(mod, e);
-    });
-};
-XBetaHingePrototype.attributeChangedCallback = function(name, oldVal, newVal) {
-    if (name in this.model) {
-        this.model[name](newVal);
+var pathOf = (fourVals, scale) => {
+    var points = [];
+    var xs = [-10, -1, 1, 10];
+    var ys = fourVals;
+    for (i in xs) {
+        var x = xs[i]*scale;
+        var y = ys[i]*scale;
+        points.push(x+' '+y);
     }
+    return "M " + points.join(" L ");
 };
 
-var XBetaHinge = document.registerElement('x-beta-hinge', {
-  prototype: XBetaHingePrototype
+Vue.component('beta-hinge', {
+    template: '#tpl-beta-hinge',
+    props: ['beta'],
+    data: ()=> ({
+        scale: 1,
+    }),
+    computed: {
+        hingePath() { return pathOf([0, 0, 2*this.beta, 11*this.beta], this.scale); },
+        invHingePath() { return pathOf([11*(1-this.beta), 2*(1-this.beta), 0, 0], this.scale); },
+        betaHingePath() { return pathOf([11*(1-this.beta), 2*(1-this.beta), 2*this.beta, 11*this.beta], this.scale); },
+    },
 });
-</script>
+
+var app = new Vue({
+    el: '#bhinge',
+    data: ()=> ({
+        b1000: 500,
+        bstep: 1000,
+    }),
+    methods: {
+        animateBeta() {
+            this.b1000 = this.b1000 < 500 ? 0 : 1000;
+            TweenLite.to(this.$data, 3, { b1000: 1000-this.b1000 });
+        }
+    },
+});
+    </script>
 
 
   </body>
