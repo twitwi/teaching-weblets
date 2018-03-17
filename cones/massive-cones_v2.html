@@ -1,0 +1,316 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"></meta>
+
+    <script src="../lib/vue.min.js"></script>
+    <!--script src="vue-color.min.js"></script-->
+
+    <style>
+    .inlinemirror {
+        display: inline-block;
+        transform: scale(-1, 1);
+    }
+    .plotandsets {
+        float: left;
+        margin-right: 20px;
+    }
+    .controls {
+    }
+    .editpoint {
+        border: 1px solid black;
+    }
+    .opaque .shade:not(.highlight) {
+        fill: #777777FF !important;
+    }
+    .withaxes {
+        border: 2px solid black;
+        border-width: 0 0 2px 2px;
+    }
+    .withaxes {
+        width: 400px;
+        height: 400px;
+    }
+    .point {
+        fill: none;
+        stroke: black;
+        stroke-width: 1;
+    }
+    .shade {
+        fill: #0000007F;
+        transition: fill 500ms;
+    }
+    .shade.highlight {
+        fill: #0000FF7F;
+    }
+    .shade.highlight.left {
+        fill: #FF00007F;
+    }
+    .shade.highlight.right {
+        fill: #00FF007F;
+    }
+    .lowershade {
+        fill: #0000002F;
+    }
+    .details {
+        overflow-y: scroll;
+        max-height: 300px;
+    }
+    .sets>a { color: black; }
+    .sets>a.currentSet { text-decoration: none; border-bottom: 3px solid red; }
+    </style>
+
+</head>
+<body>
+
+
+    <script type="text/x-template" id="tpl-thesvg">
+    </script>
+    <script type="text/x-template" id="tpl-onepoint">
+        <g>
+            <rect class="point" x="-2" y="-2" width="4" height="4"/>
+            <path :class="{shade: true, highlight: highlight}" :d="'M 0 0 L '+(-800/o.slope)+' -800 l '+(2*800/o.slope)+' 0 Z'"/>
+            <path v-if="p.showRight || highlight" :class="{shade: true, right: true, highlight: highlight}"
+            :d="'M '+(800/o.slope)+' -800 L '+(800*(o.rightHeight - o.f)/o.slope)+' '+(-800*(o.rightHeight - o.f))+' l 800 0 Z'"/>
+            <path v-if="p.showLeft || highlight" :class="{shade: true, left: true, highlight: highlight}"
+            :d="'M '+(-800/o.slope)+' -800 L '+(-800*(o.leftHeight - o.f)/o.slope)+' '+(-800*(o.leftHeight - o.f))+' l -800 0 Z'"/>
+        </g>
+    </script>
+
+    <div id="app">
+        <div class="all"
+        @keydown.e="toggle('enhance')"
+        @keydown.l="toggle('showLeft')"
+        @keydown.r="toggle('showRight')"
+        @keydown.b="toggle('betterRight')"
+        @keydown.p="toggle('betterPhi')"
+        @keydown.o="toggle('opaque')"
+        >
+        <div class="plotandsets">
+            <svg :class="{plot: true, withaxes: true, opaque}" xmlns="http://www.w3.org/2000/svg">
+                <g v-for="(o, i) in fullPoints" :transform="'translate('+o.t*200+', '+(400-400*o.f)+')'">
+                    <one-point v-if="i != currentIndex" :p="me()" :o="o" :i="i" :highlight="i==currentIndex"></one-point>
+                </g>
+                <g v-for="(o, i) in fullPoints" :transform="'translate('+o.t*200+', '+(400-400*o.f)+')'">
+                    <one-point v-if="i == currentIndex" :p="me()" :o="o" :i="i" :highlight="i==currentIndex"></one-point>
+                </g>
+                <path class="lowershade" :d="'M 0 400 l 0 '+(-400*bestF)+' l 400 0 L 400 400 Z'"/>
+            </svg>
+            <div class="sets">
+                <a v-for="i in Array.from(Array(nSets).keys())" :class="{currentSet: i==currentSet}"
+                href="" @click.prevent="setSet(i)">[{{i}}]</a>
+                <a href="" @click.prevent="setSet((currentSet-1+nSets)%nSets)">«</a>
+                <a href="" @click.prevent="setSet((currentSet+1)%nSets)">»</a>
+            </div>
+        </div>
+        <div class="controls">
+            <br/> P = <input type="number" v-model="P"/>
+            <br/> N = <input type="number" v-model="N"/>
+            <br/> β = <input type="range" min="0.01" max="5" step="0.01" v-model.number="beta"/> ({{beta}})
+
+            <br/> <label><input id="focus" type="checkbox" v-model="enhance"/> (e) enhanced</label>
+            <br/> <label><input type="checkbox" v-model="betterPhi"/> (p) better Φ </label>
+            <br/> <label><input type="checkbox" v-model="showRight"/> (r) <span class="inlinemirror">⇲</span> </label>
+            (<label><input type="checkbox" v-model="betterRight"/> (b) better</label>)
+            <br/> <label><input type="checkbox" v-model="showLeft"/> (l) ⇲ </label>
+            <br/> <label><input type="checkbox" v-model="opaque"/> (o) opaque </label>
+            <br/> <label><input type="checkbox" v-model="swapT"/> swap t on load</label>
+        </div>
+
+        <div class="details">
+            Grid with random:
+            <a @click="loadGrid(29)">(29)</a>
+            <a @click="loadGrid(19)">(19)</a>
+            <a @click="loadGrid(9)">(9)</a>
+            <a @click="loadGrid(5)">(5)</a>
+            <div class="editpoint" v-for="(p, i) in points" @mouseover="setCurrentIndex(i)">
+                t: <input type="range" min="0" max="2" step="0.01" v-model.number="p.t"/> ({{p.t}})
+                <br/> FP: <input type="range" min="0" :max="N" step="1" v-model.number="p.fp"/> ({{p.fp}})
+                <br/> FN: <input type="range" min="0" :max="P" step="1" v-model.number="p.fn"/> ({{p.fn}})
+                <a @click="deletePoint(i)">(delete)</a> F={{fullPoints[i].f}}
+                ({{fullPoints[i].leftHeight}} -- {{fullPoints[i].rightHeight}})
+            </div>
+            <a @click="addPoint()">(new)</a>
+        </div>
+    </div>
+</div>
+
+<!-- pointer-events none on the png image -->
+
+<span style="display:none" id="JSON">
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C-6.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C-5.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C-4.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C-3.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C-2.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C-1.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C0.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C1.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C2.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C3.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C4.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C5.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+    <object data="adult_fold0_trainset_v2/points_adult_v2_C6.json" onload="startApp()" onerror="errorLoading()" type="text/plain"></object>
+</span>
+
+<script>
+var myeach = function(coll, cb) {
+    [].forEach.call(coll, cb);
+};
+
+function l2norm(x, y) {
+    return Math.sqrt(x*x + y*y);
+}
+var inited = false;
+function startApp() {
+
+    if (inited) return;
+
+    var loadedInfo = [];
+    try {
+        let externals = document.querySelectorAll('#JSON>object');
+        myeach(externals, (ex) => loadedInfo.push(JSON.parse(ex.contentDocument.body.querySelector('pre').textContent)));
+    } catch (e) {
+        console.log("Some JSON are not loaded", e);
+        return;
+    }
+
+    inited = true;
+    Vue.component('cone', {
+        template: '#tpl-thesvg',
+        compiled: function() {
+            alert("comp")
+            console.log("COMPILED", (this.$el))
+        },
+        methods: {
+        }
+    });
+    Vue.component('one-point', {
+        template: '#tpl-onepoint',
+        props: ['o', 'i', 'highlight', 'p']
+    });
+
+    window.app = new Vue({
+        el: '#app',
+        data: {
+            currentIndex: -1,
+            enhance: true,
+            betterPhi: false,
+            swapT: true,
+            showRight: true,
+            betterRight: true,
+            showLeft: true,
+            opaque: true,
+            nSets: loadedInfo.length,
+            currentSet: 0,
+            ...loadedInfo[0]
+        },
+        created: function() {
+            this.setSet(this.currentSet);
+        },
+        methods: {
+            me() { return this; },
+            toggleEnhance() { this.enhance = !this.enhance; },
+            toggle(what) { this[what] = !this[what]; },
+            setSet(i) {
+                this.currentSet = i;
+                console.log(loadedInfo[i])
+                for (k in loadedInfo[i]) {
+                    console.log(k)
+                    this[k] = JSON.parse(JSON.stringify(loadedInfo[i][k]));
+                    if (this.swapT && k == "points") {
+                        this[k] = this[k].map( (o) => ({...o, t: 2-o.t}) );
+                    }
+                }
+            },
+            deletePoint(i) {
+                this.points.splice(i, 1);
+            },
+            addPoint() {
+                this.points.push({
+                    t: Math.random()*2,
+                    fp: parseInt(Math.random()*this.N),
+                    fn: parseInt(Math.random()*this.P)
+                });
+            },
+            loadGrid(n) {
+                let R = .05;
+                this.points = Array.from(Array(n).keys()).map( (i)=>({
+                    t: 2*(0.01+i/(n-1)*.99),
+                    fp: parseInt((Math.random()*R+R)*this.N),
+                    fn: parseInt((Math.random()*R+R)*this.P),
+                }));
+                this.points = Array.from(Array(n).keys()).map( (i)=>({
+                    t: 2*(0.01+i/(n-1)*.99),
+                    fp: parseInt((n-i)/(n-1)/3*this.N),
+                    fn: parseInt((i)/(n-1)/3*this.P),
+                }));
+            },
+            setCurrentIndex(i) {
+                console.log(this.currentIndex, i);
+                this.currentIndex = i;
+            }
+        },
+        computed: {
+            theirs: function() { return !this.enhance; },
+            M: function() {
+                return l2norm(this.P, this.N);
+            },
+            phi: function() {
+                return 1/(this.beta*this.beta*this.P);
+            },
+            fullPoints: function() {
+                return this.points.map( o=> {
+                    var b2 = this.beta*this.beta;
+                    var normE = l2norm(o.fp, o.fn);
+                    var tp = this.P - o.fn;
+                    var tn = this.N - o.fp;
+                    var f = (1+b2)*tp / ((1+b2)*this.P - o.fn + o.fp);
+                    {
+                        let e1 = o.fn;
+                        let e2 = o.fp;
+
+                        let N1a2 = -e2;
+                        let N1a1 = -N1a2*(this.P - e1) / (this.P + e2);
+                        let N1n = l2norm(e1 + N1a1, e2 + N1a2);
+
+                        let N2a2 = Math.min(this.N - e2, e1*(this.P + e2) / (this.P - e1));
+                        let N2a1 = -N1a2*(this.P - e1) / (this.P + e2);
+                        let N2n = l2norm(e1 + N2a1, e2 + N2a2);
+
+                        var normErestricted = Math.max(N1n, N2n);
+                    }
+                    var slope;
+                    if (this.theirs) {
+                        slope = 2 * 2 * this.M * this.phi;
+                    } else {
+                        slope = Math.sqrt(2) * (normE+normErestricted) * this.phi;
+                    }
+                    var rightHeight;
+                    if (this.betterRight) {
+                        rightHeight = (1+b2) * (this.P - o.fn + o.fp) / ((1+b2) * this.P - o.fn + o.fp);
+                        if (o.fn - o.fp < 0) rightHeight = 2;
+                    } else {
+                        rightHeight = (1+b2) * (1+b2) / o.t * tp / (b2 * (1+b2) / o.t * tp + this.P);
+                        // ^ TODO check because it seems to better than the new one, when beta is small
+                    }
+                    var leftHeight = (1+b2) * this.P / ((1+b2) * this.P + o.fp - o.fn);
+                    if (o.fp - o.fn < 0) leftHeight = 2;
+                    var res = {...o, tp, tn, f, slope, rightHeight, leftHeight};
+                    console.log(res);
+                    return res;
+                });
+            },
+            bestF: function() {
+                return Math.max.apply(Math, this.fullPoints.map(o=>o.f));
+            },
+        },
+    });
+    //app.loadGrid(19);
+    document.getElementById('focus').focus();
+}
+//startApp();
+</script>
+
+</body>
+</html>
