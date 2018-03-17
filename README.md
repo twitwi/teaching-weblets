@@ -13,7 +13,7 @@
     - Visualizing unit balls of some norms
         - [l_p norm in 2D](http://twitwi.github.io/teaching-weblets/norms/norms.html)
         - [l_2,p norm in 3D](http://twitwi.github.io/teaching-weblets/norms/norms-3d.html) (not-fully interactive)
-    - [A 2D convolution](http://twitwi.github.io/teaching-weblets/convolution/index.html) (move your mouse, possibly click or hold shift)
+    - [A 2D convolution](http://twitwi.github.io/teaching-weblets/convolution/index.html) (move your mouse, possibly click or hold shift) (NB: need a heavy file that can be generated using a script given in the repo)
     - [CDMA](http://twitwi.github.io/teaching-weblets/cdma/cdma.html) (to be updated)
 
-- [Coloring an svg document](http://twitwi.github.io/teaching-weblets/coloring-svg/coloring.html) (to be updated)
+- [Coloring an svg document](http://twitwi.github.io/teaching-weblets/coloring-svg/coloring.html)
