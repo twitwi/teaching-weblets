@@ -48,7 +48,7 @@
     <div id="appnorm">
         <norm :p="p100 / pstep"></norm>
         <br/>
-        <input style="width:400px" type="range" min="0" :max="pmax" v-model="p100"/>
+        <input style="width:400px" type="range" min="0" :max="pmax*pstep" v-model="p100"/>
         <br/>p = <span>{{(p100 / pstep).toFixed(2)}}</span>
 
         <br/> <button @click="animateP">anim</button>
@@ -116,7 +116,7 @@ var app = new Vue({
     el: '#appnorm',
     data: ()=> ({
         p100: 200,
-        pmax: 4200,
+        pmax: 42,
         pstep: 100,
     }),
     methods: {
