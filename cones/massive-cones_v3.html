@@ -6,6 +6,8 @@
     <script src="../lib/vue.min.js"></script>
     <!--script src="vue-color.min.js"></script-->
 
+    <title>CONE vizualisation</title>
+
     <style>
     .inlinemirror {
         display: inline-block;
@@ -62,37 +64,85 @@
 
 </head>
 <body>
-
-
     <script type="text/x-template" id="tpl-thesvg">
     </script>
+
     <script type="text/x-template" id="tpl-onepoint">
         <g>
-            <rect class="point" x="-2" y="-2" width="4" height="4"/>
-            <path :class="{shade: true, highlight: highlight}" :d="'M 0 0 L '+(-800/o.slope)+' -800 l '+(2*800/o.slope)+' 0 Z'"/>
-            <path v-if="p.showRight || highlight" :class="{shade: true, right: true, highlight: highlight}"
-            :d="'M '+(800/o.slope)+' -800 L '+(800*(o.rightHeight - o.f)/o.slope)+' '+(-800*(o.rightHeight - o.f))+' l 800 0 Z'"/>
-            <path v-if="p.showLeft || highlight" :class="{shade: true, left: true, highlight: highlight}"
-            :d="'M '+(-800/o.slope)+' -800 L '+(-800*(o.leftHeight - o.f)/o.slope)+' '+(-800*(o.leftHeight - o.f))+' l -800 0 Z'"/>
+            <rect v-if="highlight" class="point" :x="200*o.t-2" :y="400*(1-o.f)-2" width="4" height="4" stroke="blue" />
+
+            <rect v-if="!highlight" class="point" :x="200*o.t-2" :y="400*(1-o.f)-2" width="4" height="4" stroke="black" />
+
+            <path v-if="p.showCones && !p.leftLine" :class="{shade: true, highlight: highlight}" :d="'M '+(o.t*200)+' '+(400*(1-o.f))+' L -400 '+(400*(1-(Math.abs(-2-o.t)*o.slopeLeft+o.f)))+' L 800 '+(400*(1-(Math.abs(4-o.t)*o.slopeRight+o.f)))+' Z'"/>
+
+            <path v-if="p.showCones && p.leftLine" :class="{shade: true, highlight: highlight}" :d="'M '+(o.t*200)+' '+(400*(1-o.f))+' L -400 '+(400*(1-((-2-o.t)*o.slopeLeft+o.f)))+' L 800 '+(400*(1-(Math.abs(4-o.t)*o.slopeRight+o.f)))+' Z'"/>
+
+            <path v-if="(p.showRight || highlight) && p.showCones" :class="{shade: true, right: true, highlight: highlight}"
+            :d="'M '+(200*((o.rightHeight-o.f)/o.slopeRight+o.t))+' '+(400*(1-o.rightHeight))+' L 800 '+(400*(1-(Math.abs(4-o.t)*o.slopeRight+o.f)))+' L 800 '+(400*(1-o.rightHeight))+' Z'"/>
+
+            <path v-if="(p.showLeft || highlight) && !p.leftLine && p.showCones" :class="{shade: true, left: true, highlight: highlight}"
+            :d="'M '+(200*(o.t-(o.leftHeight-o.f)/o.slopeLeft))+' '+(400*(1-o.leftHeight))+' L -400 '+(400*(1-(Math.abs(-2-o.t)*o.slopeLeft+o.f)))+' L -800 '+(400*(1-o.leftHeight))+' Z'"/>
+        </g>
+    </script>
+
+    <script type="text/x-template" id="tpl-oneline">
+        <g>
+            <path  v-if="p.showOneLine && highlight" :d="'M 0 '+(400*(1-o.oneLineOffset))+' L 800 '+(400*(1-(4*o.oneLineSlope+o.oneLineOffset)))" stroke="blue" stroke-width="1"/>
+
+            <path  v-if="p.showOneLine && !highlight" :d="'M 0 '+(400*(1-o.oneLineOffset))+' L 800 '+(400*(1-(4*o.oneLineSlope+o.oneLineOffset)))" stroke="black" stroke-width="1"/>
+        </g>
+    </script>
+
+    <script type="text/x-template" id="tpl-twolines">
+        <g>
+            <path v-if="p.showTwoLines" :class="{shade: true, highlight: highlight}" :d="'M '+(o.t*200)+' '+(400-400*o.f)+' L -400 '+(400*(1-((-2-o.t)*o.lineSlopeLeft+o.f)))+' L 800  '+(400*(1-((4-o.t)*o.lineSlopeRight+o.f)))+'Z'"/>
         </g>
     </script>
 
     <div id="app">
+        <span>{{dataset}} C={{C}}</span>
         <div class="all"
-        @keydown.e="toggle('enhance')"
+        @keydown.c="toggle('CONE')"
+        @keydown.n="toggle('lipschitz')"
+        @keydown.r="toggle('showCones')"
+        @keydown.a="toggle('showTwoLines')"
+        @keydown.b="toggle('showOneLine')"
         @keydown.l="toggle('showLeft')"
         @keydown.r="toggle('showRight')"
-        @keydown.b="toggle('betterRight')"
         @keydown.p="toggle('betterPhi')"
+        @keydown.m="toggle('betterMmax')"
+        @keydown.d="toggle('diffNorm')"
+        @keydown.k="toggle('leftLine')"
+        @keydown.q="toggle('line')"
         @keydown.o="toggle('opaque')"
+        @keydown.shift.80="equation(0)"
+        @keydown.shift.78="equation(1)"
+        @keydown.shift.67="equation(2)"
+        @keydown.shift.65="equation(3)"
         >
         <div class="plotandsets">
             <svg :class="{plot: true, withaxes: true, opaque}" xmlns="http://www.w3.org/2000/svg">
-                <g v-for="(o, i) in fullPoints" :transform="'translate('+o.t*200+', '+(400-400*o.f)+')'">
+
+                <g v-for="(o, i) in fullPoints">
                     <one-point v-if="i != currentIndex" :p="me()" :o="o" :i="i" :highlight="i==currentIndex"></one-point>
                 </g>
-                <g v-for="(o, i) in fullPoints" :transform="'translate('+o.t*200+', '+(400-400*o.f)+')'">
+                <g v-for="(o, i) in fullPoints">
                     <one-point v-if="i == currentIndex" :p="me()" :o="o" :i="i" :highlight="i==currentIndex"></one-point>
+                </g>
+
+                <g v-for="(o, i) in fullPoints">
+                    <one-line v-if="i != currentIndex" :p="me()" :o="o" :i="i" :highlight="i==currentIndex"></one-line>
+                </g>
+
+                <g v-for="(o, i) in fullPoints">
+                    <one-line v-if="i == currentIndex" :p="me()" :o="o" :i="i" :highlight="i==currentIndex"></one-line>
+                </g>
+
+                <g v-for="(o, i) in fullPoints" >
+                    <two-lines v-if="i != currentIndex"  :p="me()" :o="o" :i="i" :highlight="i==currentIndex">></two-lines>
+                </g>
+                <g v-for="(o, i) in fullPoints" >
+                    <two-lines v-if="i == currentIndex"  :p="me()" :o="o" :i="i" :highlight="i==currentIndex">></two-lines>
                 </g>
                 <path class="lowershade" :d="'M 0 400 l 0 '+(-400*bestF)+' l 400 0 L 400 400 Z'"/>
             </svg>
@@ -108,13 +158,23 @@
             <br/> N = <input type="number" v-model="N"/>
             <br/> β = <input type="range" min="0.01" max="5" step="0.01" v-model.number="beta"/> ({{beta}})
 
-            <br/> <label><input id="focus" type="checkbox" v-model="enhance"/> (e) enhanced</label>
+            <br/> <label><input type="checkbox" v-model="showCones"/> show Cones</label>
+            <br/> <label><input type="checkbox" v-model="showTwoLines"/> show Two Lines</label>
+            <br/> <label><input type="checkbox" v-model="showOneLine"/> show One Line</label>
+            <br/> <label><input id="focus" type="checkbox" v-model="enhance"/> (c) CONE</label>
+            <br/> <label><input type="checkbox" v-model="lipschitz"/> (n) lipschitz</label>
+            <br/> <label><input type="checkbox" v-model="diffNorm"/> (d) difference instead of norm2 </label>
             <br/> <label><input type="checkbox" v-model="betterPhi"/> (p) better Φ </label>
+            <br/> <label><input type="checkbox" v-model="betterMmax"/> (m) better Mmax </label>
+            <br/> <label><input type="checkbox" v-model="leftLine"/> (k) left slope as line</label>
             <br/> <label><input type="checkbox" v-model="showRight"/> (r) <span class="inlinemirror">⇲</span> </label>
-            (<label><input type="checkbox" v-model="betterRight"/> (b) better</label>)
             <br/> <label><input type="checkbox" v-model="showLeft"/> (l) ⇲ </label>
             <br/> <label><input type="checkbox" v-model="opaque"/> (o) opaque </label>
             <br/> <label><input type="checkbox" v-model="swapT"/> swap t on load</label>
+            <br/> <button @click="equation(0)">(shift+p) Parambath</button>
+            <button @click="equation(1)">(shift+n) CONE NIPS</button>
+            <button @click="equation(2)">(shift+c) CONE</button>
+            <button @click="equation(3)">(shift+a) asym CONE</button>
         </div>
 
         <div class="details">
@@ -127,7 +187,7 @@
                 t: <input type="range" min="0" max="2" step="0.01" v-model.number="p.t"/> ({{p.t}})
                 <br/> FP: <input type="range" min="0" :max="N" step="1" v-model.number="p.fp"/> ({{p.fp}})
                 <br/> FN: <input type="range" min="0" :max="P" step="1" v-model.number="p.fn"/> ({{p.fn}})
-                <a @click="deletePoint(i)">(delete)</a> F={{fullPoints[i].f}}
+                <a @click="deletePoint(i)">(delete)</a> F={{fullPoints[i].f}}delete
                 ({{fullPoints[i].leftHeight}} -- {{fullPoints[i].rightHeight}})
             </div>
             <a @click="addPoint()">(new)</a>
@@ -176,6 +236,8 @@
 </span> -->
 
 <script>
+
+
 var myeach = function(coll, cb) {
     [].forEach.call(coll, cb);
 };
@@ -211,18 +273,32 @@ function startApp() {
         template: '#tpl-onepoint',
         props: ['o', 'i', 'highlight', 'p']
     });
+    Vue.component('one-line', {
+        template: '#tpl-oneline',
+        props: ['o', 'i', 'highlight', 'p']
+    });
+    Vue.component('two-lines', {
+        template: '#tpl-twolines',
+        props: ['o', 'i', 'highlight', 'p']
+    });
 
     window.app = new Vue({
         el: '#app',
         data: {
             currentIndex: -1,
+            showCones: true,
+            showTwoLines: false,
+            showOneLine: false,
             enhance: true,
-            betterPhi: false,
-            swapT: true,
-            showRight: true,
-            betterRight: true,
-            showLeft: true,
-            opaque: true,
+            diffNorm: true,
+            betterPhi: true,
+            betterMmax: true,
+            lipschitz: false,
+            leftLine: false,
+            swapT: false,
+            showRight: false,
+            showLeft: false,
+            opaque: false,
             nSets: loadedInfo.length,
             currentSet: 0,
             ...loadedInfo[0]
@@ -234,6 +310,83 @@ function startApp() {
             me() { return this; },
             toggleEnhance() { this.enhance = !this.enhance; },
             toggle(what) { this[what] = !this[what]; },
+            equation(id) {
+                switch(id) {
+                    case 0:
+                        this.enhance = false;
+                        this.diffNorm = false;
+                        this.betterPhi = false;
+                        this.twoLines = false;
+                        this.betterMmax = false;
+                        this.lipschitz = false;
+                        this.leftLine = false;
+                        this.showRight = false;
+                        this.showLeft = false;
+                        this.showCones = true;
+                        this.showTwoLines = false;
+                        this.showOneLine = false;
+                        break;
+                    case 1:
+                        this.enhance = true;
+                        this.diffNorm = false;
+                        this.betterPhi = false;
+                        this.twoLines = false;
+                        this.betterMmax = false;
+                        this.lipschitz = true;
+                        this.leftLine = false;
+                        this.showCones = true;
+                        this.showTwoLines = false;
+                        this.showOneLine = false;
+                        break;
+                    case 2:
+                        this.enhance = true;
+                        this.diffNorm = true;
+                        this.betterPhi = true;
+                        this.twoLines = false;
+                        this.betterMmax = true;
+                        this.lipschitz = false;
+                        this.leftLine = false;
+                        this.showCones = true;
+                        this.showTwoLines = false;
+                        this.showOneLine = false;
+                        break;
+                    case 3:
+                        this.enhance = true;
+                        this.diffNorm = true;
+                        this.betterPhi = true;
+                        this.twoLines = false;
+                        this.betterMmax = true;
+                        this.lipschitz = false;
+                        this.leftLine = true;
+                        this.showCones = true;
+                        this.showTwoLines = false;
+                        this.showOneLine = false;
+                        break;
+                    case 4:
+                        this.enhance = true;
+                        this.diffNorm = true;
+                        this.betterPhi = true;
+                        this.twoLines = false;
+                        this.betterMmax = true;
+                        this.lipschitz = false;
+                        this.leftLine = true;
+                        this.showCones = true;
+                        this.showTwoLines = false;
+                        this.showOneLine = false;
+                        break;
+                    default:
+                        this.enhance = false;
+                        this.diffNorm = false;
+                        this.betterPhi = false;
+                        this.twoLines = false;
+                        this.betterMmax = false;
+                        this.lipschitz = false;
+                        this.leftLine = false;
+                        this.showCones = true;
+                        this.showTwoLines = false;
+                        this.showOneLine = false;
+                }
+            },
             setSet(i) {
                 this.currentSet = i;
                 console.log(loadedInfo[i])
@@ -278,47 +431,86 @@ function startApp() {
             M: function() {
                 return l2norm(this.P, this.N);
             },
-            phi: function() {
-                return 1/(this.beta*this.beta*this.P);
-            },
             fullPoints: function() {
                 return this.points.map( o=> {
                     var b2 = this.beta*this.beta;
-                    var normE = l2norm(o.fp, o.fn);
+
+                    var normE;
+                    if (this.diffNorm) {
+                        normE = o.fp - o.fn;
+                    } else {
+                        normE = l2norm(o.fp, o.fn);
+                    }
+                    
                     var tp = this.P - o.fn;
                     var tn = this.N - o.fp;
                     var f = (1+b2)*tp / ((1+b2)*this.P - o.fn + o.fp);
+
+                    var normErestricted;
                     {
                         let e1 = o.fn;
                         let e2 = o.fp;
 
-                        let N1a2 = -e2;
-                        let N1a1 = -N1a2*(this.P - e1) / (this.P + e2);
-                        let N1n = l2norm(e1 + N1a1, e2 + N1a2);
+                        if (this.betterMmax) {
+                            let a21 = this.N - e2;
+                            let a22 = e1*(this.beta*this.beta*this.P + e2) / (this.P - e1);
 
-                        let N2a2 = Math.min(this.N - e2, e1*(this.P + e2) / (this.P - e1));
-                        let N2a1 = -N1a2*(this.P - e1) / (this.P + e2);
-                        let N2n = l2norm(e1 + N2a1, e2 + N2a2);
+                            normErestricted = e2 + Math.min(a21, a22);
+                        } else {
+                            let N1a2 = -e2;
+                            let N1a1 = -N1a2*(this.P - e1) / (this.P + e2);
+                            let N1n = l2norm(e1 + N1a1, e2 + N1a2);
 
-                        var normErestricted = Math.max(N1n, N2n);
+                            let N2a2 = Math.min(this.N - e2, e1*(this.P + e2) / (this.P - e1));
+                            let N2a1 = -N1a2*(this.P - e1) / (this.P + e2);
+                            let N2n = l2norm(e1 + N2a1, e2 + N2a2);
+
+                            normErestricted = Math.max(N1n, N2n);
+                        }
                     }
-                    var slope;
+
+                    var phi;
+                    if (this.betterPhi) {
+                        phi = 1/((1+this.beta*this.beta)*this.P-o.fn+o.fp);
+                    } else {
+                        phi =  1/(this.beta*this.beta*this.P);
+                    }
+
+                    var slopeRight = 0;
+                    var slopeLeft = 0;
                     if (this.theirs) {
-                        slope = 2 * 2 * this.M * this.phi;
+                        slopeRight = 2 * 2 * this.M * phi;
+                        slopeLeft = slopeRight;
                     } else {
-                        slope = Math.sqrt(2) * (normE+normErestricted) * this.phi;
+                        slopeRight = (normE+normErestricted) * phi;
+
+                        if (this.leftLine) {
+                            slopeLeft = (normE-normErestricted) * phi;
+                        } else {
+                            slopeLeft = slopeRight;
+                        }
+
+                        if (this.lipschitz) {
+                            slopeRight *= Math.sqrt(2)
+                            slopeLeft *= Math.sqrt(2)
+                        }
                     }
-                    var rightHeight;
-                    if (this.betterRight) {
-                        rightHeight = (1+b2) * (this.P - o.fn + o.fp) / ((1+b2) * this.P - o.fn + o.fp);
-                        if (o.fn - o.fp < 0) rightHeight = 2;
-                    } else {
-                        rightHeight = (1+b2) * (1+b2) / o.t * tp / (b2 * (1+b2) / o.t * tp + this.P);
-                        // ^ TODO check because it seems to better than the new one, when beta is small
-                    }
+
+                    let mmin = -o.fn - o.fp*(this.P - o.fn)/(this.beta*this.beta*this.P + o.fp);
+                    var lineSlopeRight = (o.fp - o.fn - mmin)*phi;
+                    var lineSlopeLeft = (o.fp - o.fn - normErestricted)*phi;
+
+                    var oneLineSlope = (o.fp - o.fn)*phi;
+                    var oneLineOffset = (1 + this.beta*this.beta)*o.fn*phi + f;
+
+                    var rightHeight = (1+b2) * (this.P - o.fn + o.fp) / ((1+b2) * this.P - o.fn + o.fp);
+                    if (o.fn - o.fp < 0) rightHeight = 2;
+
                     var leftHeight = (1+b2) * this.P / ((1+b2) * this.P + o.fp - o.fn);
                     if (o.fp - o.fn < 0) leftHeight = 2;
-                    var res = {...o, tp, tn, f, slope, rightHeight, leftHeight};
+
+                    var res = {...o, tp, tn, f, slopeRight, slopeLeft, rightHeight, leftHeight, 
+                               lineSlopeRight, lineSlopeLeft, oneLineSlope, oneLineOffset};
                     console.log(res);
                     return res;
                 });
