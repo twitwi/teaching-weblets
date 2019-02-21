@@ -135,7 +135,7 @@
       <input type="checkbox" v-model="grida"></input>
       <input type="checkbox" v-model="stepa"></input>
       <input type="checkbox" v-model="filla"></input>
-      <label>wa0 = {{wa0}}<input type="range" min="-50" max="50" step="1" v-model.number="wa0"></label>
+      <label>wa0 = {{wa0}}<input type="range" min="-50" max="50" step="0.1" v-model.number="wa0"></label>
       <label>wa1, wa2 = {{wa1.toFixed(2)}}, {{wa2.toFixed(2)}}
         <control-2dvec :x="wa1" :y="wa2"  @xy="[wa1, wa2] = $event" color="#ff0000"></control-2dvec>
       </label>
