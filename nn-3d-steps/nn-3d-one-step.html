@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://unpkg.com/vue@2.5.22/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-babylonjs@1.0.0-beta.6"></script>
+    <script>
+    Vue.use(window.VueBabylonjs);
+    </script>
+
+    <!--
+    <script src="../lib/numeric-1.2.6.min.js"></script>
+    <script src="../lib/vue.min.js"></script>
+    <script src="../lib/TweenMax.min.js"></script>
+  -->
+
+    <style>
+    .control-panel {
+     background:#fff;
+     font-family:'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
+     left:1ex;
+     margin:0;
+     max-height:calc(100vh - 4ex);
+     opacity:0.85;
+     overflow:auto;
+     padding:1ex;
+     position:fixed;
+     top:1ex
+    }
+    .control-panel h3 {
+     font-size:1rem;
+     margin:0
+    }
+    .control-panel label {
+     display:block;
+     text-align:center
+    }
+    .control-panel input:not([type=checkbox]) {
+     display:block
+    }
+    .control-panel .c2dvec {
+      position: relative; /* for the child */
+      width: 100px;
+      height: 100px;
+      outline: 1px solid black;
+      background: radial-gradient(#ff0000, #ffffff, #ffffff);
+    }
+    </style>
+
+
+
+</head>
+<body>
+
+  <div id="app">
+    <Scene>
+      <Camera type="arcRotate" :radius="10" :alpha="-Math.PI*0.55" :beta="Math.PI*0.1" ></Camera>
+      <Entity :rotation="[-Math.PI/2, 0, 0]" :scaling="[1, -1, 1]">
+        <Directional-Light :direction="[0, 0, -1]"></Directional-Light>
+
+        <Entity>
+          <Entity v-if="showa">
+            <line-system ref="ls1" :options="lineSystem1" :position="[-delta, 0, -delta]" v-if="grida">
+            </line-system>
+            <ribbon ref="rba" :options="ribbona" v-if="stepa">
+            </ribbon>
+            <!--Entity :rotation="[0, 0, Math.atan2(wa2, wa1)]" v-if="stepa">
+              <Extrude-Polygon :options="extrudeSigmoid" :position="[-wa0/Math.sqrt(wa1*wa1+wa2*wa2), r, 0]" :scaling="[1/Math.sqrt(wa1*wa1+wa2*wa2), 1, 1]">
+                <Material diffuse="#FF0000" >
+                  <Property name="wireframe" :any="!filla"></Property>
+                  <Property name="alphaMode" :any="BABYLON.Engine.ALPHA_MAXIMIZED"></Property>
+                </Material>
+              </Extrude-Polygon>
+            </Entity-->
+          </Entity>
+
+          <Entity v-if="showb">
+            <line-system ref="ls2" :options="lineSystem2" v-if="gridb">
+            </line-system>
+            <ribbon ref="rbb" :options="ribbonb" v-if="stepb">
+            </ribbon>
+            <!--Entity :rotation="[0, 0, Math.atan2(wb2, wb1)]"  v-if="stepb">
+              <Extrude-Polygon :options="extrudeSigmoid" :position="[-wb0/Math.sqrt(wb1*wb1+wb2*wb2), r, 0]" :scaling="[1/Math.sqrt(wb1*wb1+wb2*wb2), 1, 1]">
+                <Property name="NOvisibility" :any="0.6"></Property>
+                <Material diffuse="#00FF00" >
+                  <Property name="wireframe" :any="!fillb"></Property>
+                  <Property name="alphaMode" :any="BABYLON.Engine.ALPHA_MAXIMIZED"></Property>
+                </Material>
+              </Extrude-Polygon>
+            </Entity-->
+          </Entity>
+          <Entity v-if="showc">
+            <line-system ref="lsagg" :options="lineSystemAgg" v-if="gridc">
+            </line-system>
+            <ribbon ref="rbc" :options="ribbonc" v-if="stepc">
+            </ribbon>
+          </Entity>
+        </Entity>
+
+
+        <Entity v-if="true">
+
+          <positive-point :x="0" :y="0"></positive-point>
+          <positive-point :x="1" :y="1"></positive-point>
+          <negative-point :x="0" :y="1"></negative-point>
+          <negative-point :x="1" :y="0"></negative-point>
+
+        </Entity>
+
+        <Entity v-if="false">
+          <Box :position="[0, 0, 0]"></Box>
+          <Box :position="[0, 0, 2]"></Box>
+          <Box :position="[1, 0, 0]"></Box>
+          <Box :position="[3, 0, 0]"></Box>
+          <Box :position="[4, 0, 0]"></Box>
+          <Box :position="[0, 1, 0]"></Box>
+          <Box :position="[0, 2, 0]"></Box>
+          <Box :position="[0, 4, 0]"></Box>
+        </Entity>
+      </Entity>
+    </Scene>
+
+    <aside class="control-panel">
+
+      <h3>Step 1</h3>
+      <a href="." @click.prevent="[wa0, wa1, wa2] = [-30, 20, 20]">AND</a>
+      <a href="." @click.prevent="[wa0, wa1, wa2] = [-10, 20, 20]">OR</a>
+      <a href="." @click.prevent="[wa0, wa1, wa2] = [10, -20, -20]">NOR</a>
+      <br/>
+      <a href="." @click.prevent="showa = !showa">show</a>
+      <a href="." @click.prevent="[showa, grida, stepa, filla] = [true, false, true, true]">fill</a>
+      <a href="." @click.prevent="[showa, grida, stepa, filla] = [true, true, false, true]">grid</a>
+      <hr/>
+      <input type="checkbox" v-model="showa"></input>
+      <input type="checkbox" v-model="grida"></input>
+      <input type="checkbox" v-model="stepa"></input>
+      <input type="checkbox" v-model="filla"></input>
+      <label>wa0 = {{wa0}}<input type="range" min="-50" max="50" step="1" v-model.number="wa0"></label>
+      <label>wa1, wa2 = {{wa1.toFixed(2)}}, {{wa2.toFixed(2)}}
+        <control-2dvec :x="wa1" :y="wa2"  @xy="[wa1, wa2] = $event" color="#ff0000"></control-2dvec>
+      </label>
+
+      <hr/>
+      <h3>Step 2</h3>
+      <a href="." @click.prevent="[wb0, wb1, wb2] = [-30, 20, 20]">AND</a>
+      <a href="." @click.prevent="[wb0, wb1, wb2] = [-10, 20, 20]">OR</a>
+      <a href="." @click.prevent="[wb0, wb1, wb2] = [10, -20, -20]">NOR</a>
+      <br/>
+      <a href="." @click.prevent="showb = !showb">show</a>
+      <a href="." @click.prevent="[showb, gridb, stepb, fillb] = [true, false, true, true]">fill</a>
+      <a href="." @click.prevent="[showb, gridb, stepb, fillb] = [true, true, false, true]">grid</a>
+      <hr/>
+      <input type="checkbox" v-model="showb"></input>
+      <input type="checkbox" v-model="gridb"></input>
+      <input type="checkbox" v-model="stepb"></input>
+      <input type="checkbox" v-model="fillb"></input>
+      <label>wb0 = {{wb0}}<input type="range" min="-50" max="50" step="0.1" v-model.number="wb0"></label>
+      <label>wb1, wb2 = {{wb1.toFixed(2)}}, {{wb2.toFixed(2)}}
+        <control-2dvec :x="wb1" :y="wb2" @xy="[wb1, wb2] = $event" color="#00ff00"></control-2dvec>
+      </label>
+
+      <hr/>
+      <h3>Step of steps</h3>
+      <a href="." @click.prevent="[wc0, wc1, wc2] = [-30, 20, 20]">AND</a>
+      <a href="." @click.prevent="[wc0, wc1, wc2] = [-10, 20, 20]">OR</a>
+      <a href="." @click.prevent="[wc0, wc1, wc2] = [10, -20, -20]">NOR</a>
+      <hr/>
+      <input type="checkbox" v-model="showc"></input><br/>
+      <a href="." @click.prevent="[showc, gridc, stepc] = [true, false, true]">fill</a>
+      <a href="." @click.prevent="[showc, gridc, stepc] = [true, true, false]">grid</a>
+      <label>wc0 = {{wc0}}<input type="range" :min="-(Math.max(0, wc1)+Math.max(0, wc2)+5)" :max="-(Math.min(0, wc1)+Math.min(0, wc2)-5)" step="0.01" v-model.number="wc0"></label>
+      <label>wc1, wc2 = {{wc1.toFixed(2)}}, {{wc2.toFixed(2)}}
+        <control-2dvec :x="wc1" :y="wc2" @xy="[wc1, wc2] = $event" color="#0055ff"></control-2dvec>
+      </label>
+
+    </aside>
+
+</div>
+
+
+<script>
+let vec = Vue.$vector
+
+Vue.component('control-2dvec', {
+  template: '<div ref="d" class="c2dvec" @mousemove="fire($event)" :style="radial"><span :style="st"></span></div>',
+  methods: {
+    fire: function(ev) {
+      if (ev.buttons != 1) return
+      let rect = this.$refs.d.getBoundingClientRect()
+      let x = ev.pageX - rect.left
+      let y = ev.pageY - rect.top
+      let vx = this.minx + (this.maxx - this.minx) * x / rect.width
+      let vy = this.maxy - (this.maxy - this.miny) * y / rect.height
+      this.$emit('xy', [vx, vy])
+    }
+  },
+  data: () => ({isMounted: false}),
+  mounted () { this.isMounted = true },
+  computed: {
+    scrx: function() {
+      if (! this.isMounted) return
+      let rect = this.$refs.d.getBoundingClientRect()
+      return (this.x - this.minx) / (this.maxx - this.minx) * rect.width
+    },
+    scry: function() {
+      if (! this.isMounted) return
+      let rect = this.$refs.d.getBoundingClientRect()
+      return (this.maxy - this.y) / (this.maxy - this.miny) * rect.height
+    },
+    radial: function() {
+      return {
+        background: 'radial-gradient('+this.color+', #ffffff, #ffffff)'
+      }
+    },
+    st: function() {
+      return {
+        position: 'absolute',
+        display: 'inline-block',
+        background: 'black',
+        'border-radius': '50%',
+        width: '3px', height: '3px',
+        left: (this.scrx-1) +"px",
+        top: (this.scry-1) +"px",
+      }
+    }
+  },
+  props: {
+    x: {type:Number, default: 0},
+    y: {type:Number, default: 0},
+    color: {default: '#0000ff'},
+    minx: {type:Number, default: -25},
+    maxx: {type:Number, default: 25},
+    miny: {type:Number, default: -25},
+    maxy: {type:Number, default: 25},
+  }
+})
+
+Vue.component('negative-point', {
+  render: function (createElement) {
+    let c = Vue.BABYLON.Color4.FromHexString('#00009fff')
+    return createElement(
+      'entity',
+      {props: {position: vec([this.x, this.y, 2])}},
+      [
+          createElement('sphere', {props: {options: {diameter: .2}}}),
+          createElement('lines', {props: {options: {points: [vec([0,0,0]), vec([0,0,-100])], colors: [c,c] }}})
+      ])
+  },
+  props: {
+    x: {type: Number, required: true},
+    y: {type: Number, required: true},
+  }
+})
+
+Vue.component('positive-point', {
+  render: function (createElement) {
+    let c = Vue.BABYLON.Color4.FromHexString('#9f0000ff')
+    return createElement(
+      'entity',
+      {props: {position: vec([this.x, this.y, 2])}},
+      [
+          createElement('box', {props: {options: {size: .2}, rotation: vec([Math.PI/4, 0, Math.PI/4])}}),
+          createElement('lines', {props: {options: {points: [vec([0,0,0]), vec([0,0,-100])], colors: [c,c] }}})
+      ])
+  },
+  props: {
+    x: {type: Number, required: true},
+    y: {type: Number, required: true},
+  }
+})
+
+let linspace = (a, b, n) => Array.from(new Array(n).keys()).map(i => a + (b-a)*(i/(n-1)))
+
+let go = () => {
+window.vm = new Vue({
+  el: "#app",
+  data: () => ({
+    delta: .02,
+    hidden: false,
+    lambda: 1,
+
+    rSigmoid: 1000, // "radius" of the sigmoids
+    r: 3, // "radius" of the scene
+
+    showa: true,
+    grida: false,
+    stepa: true,
+    filla: true,
+    wa0: 0,
+    wa1: 10,
+    wa2: 0,
+
+    showb: false,
+    gridb: false,
+    stepb: true,
+    fillb: true,
+    wb0: 0,
+    wb1: 10,
+    wb2: 5,
+
+    showc: false,
+    gridc: false,
+    stepc: true,
+    wc0: -10,
+    wc1: 10,
+    wc2: 10,
+
+    r1: 0,
+    r2: 60,
+    b1: 0,
+    b2: 0,
+
+  }),
+  watch: {
+    // hack efficient refresh
+    lineSystem1: function() {
+      let a = this.$refs.ls1
+      if (a !== undefined)
+        this.BABYLON.MeshBuilder.CreateLineSystem(null, {...this.lineSystem1, instance: a.$entity}, null)
+    },
+    lineSystem2: function() {
+      let a = this.$refs.ls2
+      if (a !== undefined)
+        this.BABYLON.MeshBuilder.CreateLineSystem(null, {...this.lineSystem2, instance: a.$entity}, null)
+    },
+    lineSystemAgg: function() {
+      let a = this.$refs.lsagg
+      if (a !== undefined)
+        this.BABYLON.MeshBuilder.CreateLineSystem(null, {...this.lineSystemAgg, instance: a.$entity}, null)
+    },
+    ribbona: function() {
+      let a = this.$refs.rba
+      if (a !== undefined)
+        this.BABYLON.MeshBuilder.CreateRibbon(null, {...this.ribbona, instance: a.$entity}, null)
+    },
+    ribbonb: function() {
+      let a = this.$refs.rbb
+      if (a !== undefined)
+        this.BABYLON.MeshBuilder.CreateRibbon(null, {...this.ribbonb, instance: a.$entity}, null)
+    },
+    ribbonc: function() {
+      let a = this.$refs.rbc
+      if (a !== undefined)
+        this.BABYLON.MeshBuilder.CreateRibbon(null, {...this.ribbonc, instance: a.$entity}, null)
+    },
+  },
+  methods: {
+    gridEval: function(f, col='#ffffffff', k='lines', n=51) {
+      let r = this.r
+      let c = this.BABYLON.Color4.FromHexString(col)
+      let getValVector = ([x,y]) => this.$vector([x, y, f(x,y)])
+      if (k=='lines') {
+        return {
+          updatable: true,
+          [k]: [
+            ...linspace(-r,r,n).map(y => linspace(-r,r,n).map(x => [x, y]).map(getValVector)),
+            ...linspace(-r,r,n).map(x => linspace(-r,r,n).map(y => [x, y]).map(getValVector))
+          ],
+          colors: linspace(0,1,2*n).map(_ => linspace(0,1,n).map(_ => c)),
+        }
+      }
+      if (k=='pathArray') {
+        return {
+          updatable: true,
+          [k]: linspace(-r,r,n).map(y => linspace(-r,r,n).map(x => [x, y]).map(getValVector)),
+          colors: linspace(0,1,n*n).map(_ => c),
+        }
+      }
+    },
+  },
+
+  computed: {
+    ribbona: function() {
+      let lambda = this.lambda
+      let sig = (x) => 1/(1+Math.exp(-lambda*x))
+      let o = this
+      let f = (x,y) => sig(o.wa0 + o.wa1*x + o.wa2*y)
+      return this.gridEval(f, '#ff0000ff', 'pathArray')
+    },
+    ribbonb: function() {
+      let lambda = this.lambda
+      let sig = (x) => 1/(1+Math.exp(-lambda*x))
+      let o = this
+      let f = (x,y) => sig(o.wb0 + o.wb1*x + o.wb2*y)
+      return this.gridEval(f, '#00ff00ff', 'pathArray')
+    },
+    ribbonc: function() {
+      let lambda = this.lambda
+      let sig = (x) => 1/(1+Math.exp(-lambda*x))
+      let o = this
+      let f = (x,y) => sig(o.wc0 + o.wc1*sig(o.wa0 + o.wa1*x + o.wa2*y) + o.wc2*sig(o.wb0 + o.wb1*x + o.wb2*y))
+      return this.gridEval(f, '#0055ffff', 'pathArray')
+    },
+    lineSystemAgg: function() {
+      let lambda = this.lambda
+      let sig = (x) => 1/(1+Math.exp(-lambda*x))
+      let o = this
+      let f = (x,y) => sig(o.wc0 + o.wc1*sig(o.wa0 + o.wa1*x + o.wa2*y) + o.wc2*sig(o.wb0 + o.wb1*x + o.wb2*y))
+      return this.gridEval(f, '#0055ffff')
+    },
+    lineSystem1: function() {
+      let lambda = this.lambda
+      let sig = (x) => 1/(1+Math.exp(-lambda*x))
+      let o = this
+      let f = (x,y) => sig(o.wa0 + o.wa1*x + o.wa2*y)
+      return this.gridEval(f, '#ff0000ff')
+    },
+    lineSystem2: function() {
+      let lambda = this.lambda
+      let sig = (x) => 1/(1+Math.exp(-lambda*x))
+      let o = this
+      let f = (x,y) => sig(o.wb0 + o.wb1*x + o.wb2*y)
+      return this.gridEval(f, '#00ff00ff')
+    },
+    lineSystemSigmoid: function() {
+      let n = 501
+      let r = this.rSigmoid
+      let lambda = this.lambda
+      let sh = (y) => linspace(-r, r, n).map((v) => [v, y, 1 / (1+Math.exp(-lambda*v))]).map(this.$vector)
+      return {
+        lines: linspace(-r, r, 20).map(sh)
+      }
+    },
+
+
+    extrudeSigmoid: function() {
+      let n = 101
+      let r = this.rSigmoid
+      let lambda = this.lambda
+      let sig = (x) => 1/(1+Math.exp(-lambda*x))
+      let siginv = (y) => -Math.log(1/y -1) / lambda
+      let sh = [-r, ...linspace(0.01, .99, n-2).map(siginv), r].map((v) => [v, 0, sig(v)])
+      return {
+        shape: [[-r, 0, -1], ...sh, [r, 0, -1]].map(this.$vector),
+        depth: 2*r,
+        //sideOrientation: BABYLON.Mesh.FRONTSIDE
+        sideOrientation: BABYLON.Mesh.DOUBLESIDE
+      }
+    }
+  }
+});
+}
+setTimeout(go, 500)
+    </script>
+
+  </body>
+</html>
