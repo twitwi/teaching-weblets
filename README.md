@@ -15,5 +15,6 @@
         - [l_2,p norm in 3D](http://twitwi.github.io/teaching-weblets/norms/norms-3d.html) (not-fully interactive)
     - [A 2D convolution](http://twitwi.github.io/teaching-weblets/convolution/index.html) (move your mouse, possibly click or hold shift) (NB: need a heavy file that can be generated using a script given in the repo)
     - [CDMA](http://twitwi.github.io/teaching-weblets/cdma/cdma.html) (to be updated)
+    - [NN3D](http://twitwi.github.io/teaching-weblets/nn-3d-steps/nn-3d-one-step.html)
 
 - [Coloring an svg document](http://twitwi.github.io/teaching-weblets/coloring-svg/coloring.html)
