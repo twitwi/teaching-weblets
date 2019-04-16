@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <script src="svg-inject.min.js"></script>
     <script src="https://unpkg.com/vue@2.5.22/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-babylonjs@1.0.0-beta.6"></script>
     <script>
@@ -17,6 +18,7 @@
     <style>
     .control-panel {
      background:#fff;
+     width: 200px;
      font-family:'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
      left:1ex;
      margin:0;
@@ -45,7 +47,23 @@
       outline: 1px solid black;
       background: radial-gradient(#ff0000, #ffffff, #ffffff);
     }
+
+
+    .schema { position: absolute; left: calc(200px + 3ex); width: 20%; background: rgba(255, 255, 255, 1); border-radius: 0 0 1em 0; }
     </style>
+    <script>
+function afterInject(im, svg) {
+  let txt = n => {
+    let o = svg.querySelector(`#${n}text`)
+    if (o !== null) {
+      o.textContent = `{{${n} | onedigit}}`
+      o.setAttribute('v-on:click', `askInput("${n}")`)
+    }
+  }
+  for (let l of 'abc') for (let n of '012') txt(`w${l}${n}`)
+  for (let l of 'abc') svg.querySelector(`#neuron${l}`).setAttribute(':style', `{ opacity: show${l} ? 1 : 0.3}`)
+}
+    </script>
 
 
 
@@ -53,6 +71,7 @@
 <body>
 
   <div id="app">
+    <img class="schema" src="mlp.svg" onload="SVGInject(this, {makeIdsUnique:false, afterInject})" />
     <Scene>
       <Camera type="arcRotate" :radius="10" :alpha="-Math.PI*0.55" :beta="Math.PI*0.1" ></Camera>
       <Entity :rotation="[-Math.PI/2, 0, 0]" :scaling="[1, -1, 1]">
@@ -180,6 +199,8 @@
 
 <script>
 let vec = Vue.$vector
+
+Vue.filter("onedigit", v => v.toFixed(1))
 
 Vue.component('control-2dvec', {
   template: '<div ref="d" class="c2dvec" @mousemove="fire($event)" :style="radial"><span :style="st"></span></div>',
@@ -345,6 +366,12 @@ window.vm = new Vue({
     },
   },
   methods: {
+    askInput: function(k) {
+      let v = window.prompt('Change '+k)
+      if (v !== null) {
+        this[k] = parseFloat(v)
+      }
+    },
     gridEval: function(f, col='#ffffffff', k='lines', n=51) {
       let r = this.r
       let c = this.BABYLON.Color4.FromHexString(col)
