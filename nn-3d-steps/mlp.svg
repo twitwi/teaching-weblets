@@ -28,7 +28,7 @@
      id="namedview58"
      showgrid="false"
      inkscape:zoom="2.3167334"
-     inkscape:cx="200.58603"
+     inkscape:cx="125.26446"
      inkscape:cy="16.933067"
      inkscape:window-x="0"
      inkscape:window-y="0"
@@ -202,7 +202,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="wc2line"
-       d="M 291.03431,158.71139 391.28742,116.05067"
+       d="M 291.03444,158.70971 391.28729,116.0504"
        style="fill:none;fill-rule:evenodd;stroke:#000080;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
        transform="rotate(15)"
@@ -242,7 +242,8 @@
   </g>
   <g
      id="neuronb"
-     inkscape:label="#g918">
+     inkscape:label="#g918"
+     transform="translate(0,-0.00195)">
     <g
        transform="matrix(0.49593729,0,0,0.49593729,127.58944,62.56546)"
        id="g4233">
@@ -280,7 +281,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="wb0line"
-       d="M 58.133925,52.40079 242.3559,156.09423"
+       d="M 58.133998,52.402609 242.35581,156.09438"
        style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#008000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     <path
        inkscape:connection-start="#g4249"
@@ -289,7 +290,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="wb2line"
-       d="m 61.085955,169.38086 177.372595,0"
+       d="m 61.085955,169.38261 177.372595,-0.002"
        style="fill:none;fill-rule:evenodd;stroke:#008000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <path
        inkscape:connection-start="#g4244"
@@ -298,19 +299,8 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="wb1line"
-       d="M 60.234337,111.48196 239.59793,161.96135"
+       d="M 60.234386,111.48373 239.59786,161.96156"
        style="opacity:1;vector-effect:none;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#008000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
-    <text
-       inkscape:label="#text1041"
-       id="wa2text"
-       y="163.12181"
-       x="129.64989"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;opacity:0.87999998;fill:#800000;fill-opacity:1;stroke:none"
-       xml:space="preserve"><tspan
-         y="163.12181"
-         x="129.64989"
-         id="tspan874"
-         sodipodi:role="line">wa2</tspan></text>
     <text
        transform="rotate(30)"
        xml:space="preserve"
@@ -349,7 +339,7 @@
   </g>
   <g
      id="neurona"
-     transform="translate(-8.7091221e-6,0.01400705)"
+     transform="translate(-8.7091221e-6,0.014007)"
      inkscape:label="#g934">
     <g
        id="g4310"
@@ -388,7 +378,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="wa0line"
-       d="M 60.228252,47.336803 239.60327,97.94448"
+       d="M 60.228252,47.336804 239.60327,97.94448"
        style="fill:none;fill-rule:evenodd;stroke:#800000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <rect
        y="84.837936"
@@ -438,5 +428,16 @@
          id="tspan870"
          x="129.53595"
          y="97.820969">wa1</tspan></text>
+    <text
+       inkscape:label="#text1041"
+       id="wa2text"
+       y="163.1078"
+       x="129.6499"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:13.33333302px;line-height:1.25;font-family:monospace;-inkscape-font-specification:monospace;letter-spacing:0px;word-spacing:0px;opacity:0.87999998;fill:#800000;fill-opacity:1;stroke:none"
+       xml:space="preserve"><tspan
+         y="163.1078"
+         x="129.6499"
+         id="tspan874"
+         sodipodi:role="line">wa2</tspan></text>
   </g>
 </svg>

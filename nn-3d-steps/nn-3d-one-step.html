@@ -33,6 +33,7 @@
      font-size:1rem;
      margin:0
     }
+    .control-panel input[type=range] { border: 2px solid black; }
     .control-panel label {
      display:block;
      text-align:center
@@ -57,11 +58,16 @@ function afterInject(im, svg) {
     let o = svg.querySelector(`#${n}text`)
     if (o !== null) {
       o.textContent = `{{${n} | onedigit}}`
-      o.setAttribute('v-on:click', `askInput("${n}")`)
+      o.setAttribute('v-on:click.stop', `askInput("${n}")`)
     }
   }
+  let neuron = l => {
+    let o = svg.querySelector(`#neuron${l}`)
+    o.setAttribute(':style', `{ opacity: show${l} ? 1 : 0.3}`)
+    o.setAttribute('v-on:click', `show${l} = !show${l}`)
+  }
   for (let l of 'abc') for (let n of '012') txt(`w${l}${n}`)
-  for (let l of 'abc') svg.querySelector(`#neuron${l}`).setAttribute(':style', `{ opacity: show${l} ? 1 : 0.3}`)
+  for (let l of 'abc') neuron(l)
 }
     </script>
 
