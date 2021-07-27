@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vue-Python sample 7 (slicing demo)</title>
+  <script src="https://cdn.jsdelivr.net/gh/pythonpad/brython-runner/lib/brython-runner.bundle.js"></script>
+  <!--script src="https://cdn.jsdelivr.net/npm/brython@3/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3/brython_stdlib.js"></script-->
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://unpkg.com/vue-i18n@next"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+  <style>
+  body { padding: 1em; }
+  .indented { margin-left: 1.5em; padding-left: 1em; border-left: 5px solid lightgrey; }
+
+  table { font-size: 13px; border: 1px solid black; border-collapse: collapse;; }
+  td { text-align: center; }
+  td:nth-child(n+2) { padding: .1em .1em; min-width: 2em; }
+  .indices {font-family: monospace; font-size: 75%;}
+  .negative.indices {color: darkgrey;}
+
+  .values td:nth-child(n+2) { background: rgba(calc(255 * var(--value)), 255, 0, var(--value))}
+  .values td:nth-child(n+2) { border-bottom: 3px solid white; }
+  .values td:nth-child(n+2).picked, input.picked { border-bottom: 3px solid blue !important;}
+
+  ::selection { color: white; background: chartreuse; text-shadow: black 1px 1px 2px, black -1px 1px 2px, black 1px -1px 2px;}
+
+  .help {
+    position: relative;
+    background: yellow;
+    color: red;
+    border: 1px solid black;
+    padding: .2em .4em;
+    cursor: copy;
+  }
+  .help::before {
+      content: attr(title);
+      white-space: nowrap;
+      color: white;
+      background-color: #333;
+      padding: .25em;
+      position: absolute;
+      bottom: 110%; left: 50%;
+      transform-origin: center bottom;
+      transition: transform 250ms, opacity 200ms;
+      transform: translate(-50%, 0) scale(0, 0);
+      opacity: 0;
+  }
+  /* class is so we can click (TODO) */
+  .help:hover::before, .help.hover::before {
+    z-index: 999;
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  .indicator {
+      border: 2px solid transparent;
+  }
+  .working {
+      background: #AAF;
+  }
+  .error {
+      border-color: red;
+  }
+  .blinky:not(.blinkyIn) {
+      transition: color 1000ms linear;
+  }
+  .blinky.blinkyIn {
+      transition: color 1ms linear;
+      color: white;
+  }
+  </style>
+</head>
+<body>
+
+    <div id="main" >
+    <p :class="{indicator: true, working: working>0, error: error.length>0}" @click="maybeShowError()">
+        {{$t('message.intro')}}
+    </p>
+
+    <p>
+        {{$t('message.inputExpr')}}    
+    <help title="list(range(40, 60))" a="input_expr"></help>
+    <help title="list(range(40, 68))" a="input_expr"></help>
+    <help title="list(range(40, 69))" a="input_expr"></help>
+    <help title="list(range(40, 70))" a="input_expr"></help>
+    <input v-model="input_expr" placeholder="list(range(40, 70))" :class="{blinky: true, blinkyIn: input_exprCHANGE%2}"/>
+    </p>
+
+    <div class="indented">
+      <pre><code>>>> {{i_name}} = {{input_expr}}
+>>> print({{i_name}})
+[{{input.join(', ')}}]</code></pre>
+
+        <h3>{{$t('word.input')}} <code>{{ i_name }}</code></h3>
+        <table>
+          <tr class="indices">
+            <td>{{$t('word.indices')}}</td>
+            <td v-for="v,i in input">{{i}}</td>
+            <td/>
+          </tr>
+          <tr class="values">
+            <td>{{$t('word.values')}}</td>
+            <td v-for="v,i in taginput" :class="{picked: isPicked(v)}" :style="{'--value': tdValue(clean(v))}">{{clean(v)}}</td>
+          </tr>
+          <tr class="negative indices">
+            <td>{{$t('word.negIndices')}}</td>
+            <td v-for="v,i in input">{{-input.length + i}}</td>
+          </tr>
+        </table>
+        {{/*input*/}}
+
+      </div>
+
+    <p>
+    {{$t('message.sliceExpr')}}
+    <help title=":" a="slice_expr"></help>
+    <help title="5:15" a="slice_expr"></help>
+    <help title="5:" a="slice_expr"></help>
+    <help title="5:-1" a="slice_expr"></help>
+    <help title="5:-2" a="slice_expr"></help>
+    <help title="5:-3" a="slice_expr"></help>
+    <help title="5:-10" a="slice_expr"></help>
+    <input v-model="slice_expr" :class="{picked: true, blinky: true, blinkyIn: slice_exprCHANGE%2}"/>
+    </p>
+
+    <div class="indented">
+      <pre><code>
+>>> {{i_name}} = {{input_expr}}
+>>> {{o_name}} = {{i_name}}[{{slice_expr}}]
+>>> print({{o_name}})
+{{is_error ? '..... the expression caused an error... no print' : outputAsStr }}
+{{is_error ? error_message : ''}}</code></pre>
+
+      <h3>{{$t('word.output')}} <code>{{o_name}}</code>, {{$t('word.afterRunning')}} <code>{{o_name}} = {{i_name}}[{{slice_expr}}]</code></h3>
+      <table v-if="tagoutput.join !== undefined">
+        <tr class="indices">
+          <td>{{$t('word.indices')}}</td>
+          <td v-for="v,i in output">{{i}}</td>
+          <td/>
+        </tr>
+        <tr class="values">
+          <td>{{$t('word.values')}}</td>
+          <td v-for="v,i in output" class="picked" :style="{'--value': tdValue(v)}">{{v}}</td>
+        </tr>
+        <tr class="negative indices">
+          <td>{{$t('word.negIndices')}}</td>
+          <td v-for="v,i in output">{{-output.length + i}}</td>
+        </tr>
+      </table>
+      {{ /*output*/ }}
+    </div>
+  </div>
+
+
+  <script>
+      let CHelp = {help: {
+          props: ['title', 'a'],
+          template: `<span class="help" :title="title" @click="$parent[a] = title">?</span>`
+      }}
+      app = Vue.createApp({
+          components: {
+              ...CHelp
+          },
+          data: () => ({
+              i_name: 'l',
+              o_name: 's',
+              slice_expr: '5:15',
+              slice_exprCHANGE: 0,
+              is_error: false,
+              input_expr: "[]",
+              input_exprCHANGE: 0,
+              input: [],
+              working: true,
+              error: "",
+              tagoutput: [],
+          }),
+          mounted() {
+              window.setTimeout(() => {
+                  this.working = 0
+                  this.input_expr = "list(range(40,60))"
+              }, 200)
+          },
+          watch: {
+              slice_expr(v) {
+                  this.slice_exprCHANGE++
+                  window.setTimeout(() => {this.slice_exprCHANGE++}, 100)
+              },
+              async input_expr(v) {
+                  this.input_exprCHANGE++
+                  window.setTimeout(() => {this.input_exprCHANGE++}, 100)
+                  let that = this
+                  this.working++
+                  const runner = new BrythonRunner({
+                      stdout: {
+                          write(content) {
+                              window.console.log("accept1:", content)
+                              that.input = JSON.parse(content)
+                              that.error = ""
+                          },
+                          flush() {},
+                      },
+                      stderr: {
+                          write(content) {
+                              that.error = content
+                          },
+                          flush() {},
+                      },
+                  })
+                  let code = "import json\nprint(json.dumps("+v+"))"
+                  window.console.log("run1:", code)
+                  let res = await runner.runCode(code)
+                  this.working--
+                  if (that.error.length === 0) {
+                      let e = this.slice_expr
+                      that.slice_expr = ""
+                      this.$nextTick(() => { this.slice_expr = e})
+                  }
+              },
+              async slicedTaggedExpression(v) {
+                  if (this.tagExpr === "") {
+                      return
+                  }
+                  let that = this
+                  this.working ++
+                  const runner = new BrythonRunner({
+                      stdout: {
+                          write(content) {
+                              window.console.log("accept2:", content)
+                              that.tagoutput = JSON.parse(content)
+                              that.error = ""
+                          },
+                          flush() {},
+                      },
+                      stderr: {
+                          write(content) {
+                              that.error = content
+                          },
+                          flush() {},
+                      },
+                  })
+                  let code = that.i_name+" = "+that.input+"\n___"+that.i_name+" = "+JSON.stringify(that.taginput)+"\nimport json\nprint(json.dumps("+v+"))"
+                  console.log(code)
+                  let res = await runner.runCode(code)
+                  this.working --
+                  /*
+                  if (that.error.length === 0) {
+                      let e = this.slice_expr
+                      that.slice_expr = ""
+                      this.$nextTick(() => { this.slice_expr = e})
+                  }
+*/
+              }
+          },
+          computed:  {
+              minValue() {
+                  return Math.min(...this.input)
+              },
+              maxValue() {
+                  return Math.max(...this.input)
+              },
+              taginput() {
+                  return this.input.map((v,i) => v+'#'+String(i).padStart(3, '0'))
+              },
+              slicedTaggedExpression() {
+                  return '___'+this.i_name+'['+this.slice_expr+']'
+              },
+              output () {
+                  return this.tagoutput.map(this.clean)
+              },
+              outputAsStr () {
+                  let o = this.tagoutput
+                  return o.join === undefined ? o : '['+o.map(this.clean).join(', ')+']'
+              }
+          },
+          methods: {
+              maybeShowError() {
+                  if (this.error) window.alert(this.error)
+              },
+              clean (v) {
+                  return v.replace(/#[0-9]*$/, '')
+              },
+              tdValue (v) {
+                  return (v - this.minValue) / (this.maxValue - this.minValue + 0.000001)
+              },
+              isPicked (v) {
+                  if (this.tagoutput === v) return true
+                  if (this.tagoutput.indexOf === undefined) return false
+                  return this.tagoutput.indexOf(v) !== -1
+              }
+          }
+      })
+      const messages = {
+          en: {
+              message: {
+                  intro: 'This page helps experimenting to understand Python list slicing.',
+                  inputExpr: 'Enter a list expression:',
+                  sliceExpr: 'Now, enter a slice expression:',
+              },
+              word: {
+                  input: 'Input',
+                  output: 'Output, after running {expr}',
+                  afterRunning: 'after running',
+                  indices: 'Indices',
+                  values: 'Values',
+                  negIndices: 'Negative Indices',
+              },
+          },
+          fr: {
+              message: {
+                  intro: 'Cette page aide à experimenter pour comprendre les "tranches" de liste en Python.',
+                  inputExpr: 'Entrez une expression de liste :',
+                  sliceExpr: 'Maintenant, entrez une expression de tranche :',
+              },
+              word: {
+                  input: 'Entrée',
+                  output: "Sortie",
+                  afterRunning: "après l'execution de",
+                  indices: 'Indices',
+                  values: 'Valeurs',
+                  negIndices: 'Indices Négatifs',
+              },
+          }
+      }
+      let loc = navigator.language || navigator.userLanguage
+      app.use(VueI18n.createI18n({
+          locale: loc,
+          fallbackLocale: 'en',
+          messages
+      }))
+      app.mount('#main')
+  </script>
+</body>
+</html>
