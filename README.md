@@ -4,6 +4,9 @@
     - [EN](http://twitwi.github.io/teaching-weblets/galette): probability to cut the bean,
     - [FR](http://twitwi.github.io/teaching-weblets/galette/index-fr.html) : probabilité de couper la fève.
 
+- Simple helpers
+    - [Python list slicing](http://twitwi.github.io/teaching-weblets/python-slicing/slicing.html) to help understanding slicing
+
 - Illustrations related to some algorithms, models, etc
     - [2d normal distribution](http://twitwi.github.io/teaching-weblets/gaussian2d/gaussian2d.html) as a support for going to higher dimension and to Gaussian Processes
     - [beta hinge loss](http://twitwi.github.io/teaching-weblets/beta-hinge-loss/beta-hinge-loss.html) from the following paper http://vzantedeschi.com/betarisk.html
