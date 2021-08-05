@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Dirichlet Distribution (Interactive)</title>
+  <script src="https://unpkg.com/vue@next"></script>
+  <script src="https://unpkg.com/vue-i18n@next"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+  <style>
+      #main>svg {
+          width: 100vw;
+          height: 100vh;
+      }
+      html {
+          overflow: hidden;
+      }
+      .offscreen {
+          display: none;
+          /*border: 1px solid red;*/
+      }
+      .controls {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 40%;
+      }
+      .useless {
+          color: grey;
+      }
+  </style>
+</head>
+<body>
+
+    <div id="main" >
+
+        <div class="controls">
+            <div v-if="generalized">GDD({{α1.toFixed(2)}}, {{α2.toFixed(2)}}, {{b1.toFixed(2)}}, {{b2.toFixed(2)}})</div>
+            <div v-else>Dir({{α1.toFixed(2)}}, {{α2.toFixed(2)}}, {{α3.toFixed(2)}})</div>
+            <input type="range" min="0.5" max="10" step="0.01" v-model.number="α1"/>
+            <input type="range" min="0.5" max="10" step="0.01" v-model.number="α2"/>
+            <input type="range" min="0.5" max="10" step="0.01" v-model.number="α3" :disabled="generalized"/>
+            <div>all together</div>
+            <input type="range" min="0.5" max="10" step="0.01" v-model.number="allαs"/>
+            <input type="range" :min="Math.log(0.5)" :max="Math.log(1001)" step=".1" v-model.number="logallαs"/>
+            <label>
+                <input type="checkbox" v-model="logView"/>
+                <span class="checkable">view logdensity</span>
+            </label>
+            <label>
+                <input type="checkbox" v-model="logCompute"/>
+                <span class="checkable">compute in log space</span>
+            </label>
+            <div>Generalized?</div>
+            <label>
+                <input type="checkbox" v-model="generalized"/>
+                <span class="checkable">view generalized Dirichlet distribution</span>
+            </label>
+            <input type="range" min="0.5" max="100" step="0.01" v-model.number="b1" :disabled="!generalized"/>
+            <input type="range" min="0.5" max="100" step="0.01" v-model.number="b2" :disabled="!generalized"/>
+        </div>
+        
+        <canvas ref="canvas" class="offscreen" :width="side" :height="side/800 * 692"></canvas> <!-- (3/4)**0.5 * 800 -->
+        <svg viewBox="0 0 800 700">
+            <defs>
+                <clipPath
+                    clipPathUnits="userSpaceOnUse"
+                    id="triangleClip">
+                    <path
+                        style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                        d="M 0,692 800,692 400,0 Z"/>
+                </clipPath>
+            </defs>
+            <rect x="10" y="10" width="780" height="680" style="fill: white;"></rect>
+            <g transform="translate(400, 340) scale(0.75, 0.75) translate(-400, -340)">
+                <image ref="image" clip-path="url(#triangleClip)" width="800" height="692" :xlink:href="imgUrl"></image> <!-- (3/4)**0.5 * 800 -->
+            </g>
+        </svg>
+        {{ /*output*/ }}
+    </div>
+  </div>
+
+
+  <script>
+      app = Vue.createApp({
+          components: {
+          },
+          data: () => ({
+              mounted: false,
+              α1: 3.0,
+              α2: 3.0,
+              α3: 3.0,
+              allαs: 3.0,
+              generalized: true,
+              b1: 4.0,
+              b2: 1.0,
+              side: 100,
+              logView: false,
+              logCompute: true,
+              //imgUrl: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.Pnj809C0kcPwECauNlpaHAHaGY%26pid%3DApi&f=1',
+          }),
+          mounted() {
+              window.vm = this
+              this.mounted = true
+          },
+          watch: {
+              allαs(v) {
+                  this.α1 =this.α2 =this.α3 = v
+              },
+              generalized(v) {
+                  if (v) {
+                      this.b2 = this.α3
+                      this.b1 = this.α2 + this.b2
+                  }
+              },
+              /*
+              slice_expr(v) {
+              },*/
+          },
+          computed:  {
+              logallαs: {
+                  get() {
+                      return Math.log(this.allαs)
+                  },
+                  set(v) {
+                      this.allαs = Math.exp(v)
+                  },
+              },
+              imgUrl() {
+                  /*
+                  logSumExp = (u, v) => {
+                      const ma = Math.max(u, v)
+                      return ma + Math.log(Math.exp(u - ma) + Math.exp(v - ma))
+                  }
+                  logSumExp3 = (u, v, w) => {
+                      const ma = Math.max(u, v, w)
+                      return ma + Math.log(Math.exp(u - ma) + Math.exp(v - ma) + Math.exp(w - ma))
+                  }
+                  //logSumExp3 = (u, v, w) => logSumExp(logSumExp(u, v), w)
+                  */
+                  if (!this.mounted || this.$refs.canvas === undefined) return ""
+                  const canvas = this.$refs.canvas
+                  const ctx = canvas.getContext('2d')
+                  const w = canvas.width
+                  const h = canvas.height
+                  const array = new Float32Array(w*h)
+                  let ε = 0// not necessary in the end
+                  let min = 1/0
+                  let max = -1/0
+                  for (let i = 0; i < h; i++) {
+                      let hs = 2+i/.866/2
+                      let p1 = 1 - (i+0.5)/h
+                      for (let j = parseInt(w/2 - hs+1); j < w/2 + hs; j++) {
+                          let ind = i*w + j
+                          let p3 = Math.max(0, (1 - p1) * (j-w/2+hs) / (2*hs))
+                          let p2 = 1 - p1 - p3
+                          let v = 0
+                          if (this.logCompute) {
+                              //v = Math.pow(p1, this.α1-1) * Math.pow(p2, this.α2-1) * Math.pow(p3, this.α3-1)
+                              if (this.generalized) {
+                                  v = Math.log(p1+ε)*(this.α1-1) + Math.log(p2+ε)*(this.α2-1) + Math.log(p3+ε)*(this.b2-1) + Math.log(p2+p3+ε)*(this.b1-(this.α2+this.b2))
+                              } else {
+                                  v = Math.log(p1+ε)*(this.α1-1) + Math.log(p2+ε)*(this.α2-1) + Math.log(p3+ε)*(this.α3-1)
+                              }
+                          } else {
+                              if (this.generalized) {
+                                  v = Math.pow(p1, this.α1-1) * Math.pow(p2, this.α2-1) * Math.pow(p3, this.b2-1) * Math.pow(p2+p3, this.b1-(this.α2+this.b2))
+                              } else {
+                                  v = Math.pow(p1, this.α1-1) * Math.pow(p2, this.α2-1) * Math.pow(p3, this.α3-1)
+                              }
+                          }
+                          array[ind] = v
+                          max = Math.max(max, v)
+                          min = Math.min(min, v)
+                      }
+                  }
+                  console.log(min, max)
+                  if (this.logCompute && !this.logView) {
+                      for (let i = 0; i < h; i++) {
+                          let hs = 2+i/.866/2
+                          for (let j = parseInt(w/2 - hs+1); j < w/2 + hs; j++) {
+                              let ind = i*w + j
+                              array[ind] = Math.exp(array[ind] - max)
+                          }
+                      }
+                      min = 0
+                      max = 1
+                      console.log(min, max, "after")
+                  }
+                  if (this.logView) {
+                      if (!this.logCompute) {
+                          let logadd = 1
+                          let logmul = 1
+                          let logorigin = max/6
+                          for (let i = 0; i < h; i++) {
+                              let hs = 2+i/.866/2
+                              for (let j = parseInt(w/2 - hs+1); j < w/2 + hs; j++) {
+                                  let ind = i*w + j
+                                  let v = array[ind]
+                                  array[ind] = Math.log(logadd + logmul*Math.max(0, v-logorigin)/(max-logorigin))
+                              }
+                          }
+                          min = Math.log(logadd)
+                          max = Math.log(logadd+logmul)
+                      } else {
+                      }
+                  } else {
+                      min = 0
+                  }
+                  const imdata = new ImageData(w, h)
+                  const data = imdata.data
+                  //let ctx = this.$refs.canvas.getContext('2d')
+                  //ctx.fillStyle = 'green'
+                  //ctx.fillRect(10, 10, 800, 500)
+                  for (let i = 0; i < h; i++) {
+                      let hs = 1+i/.866/2
+                      for (let j = parseInt(w/2 - hs); j < w/2 + hs; j++) {
+                          let ind = i*w + j
+                          let v = (array[ind]-min)/(max-min) * 255
+                          //v = Math.sqrt(v/255)*255
+                          v = Math.pow(v/255,2)*255
+                          ind *= 4
+                          data[ind+0] = parseInt(v)
+                          data[ind+1] = parseInt(v)
+                          data[ind+2] = 0
+                          data[ind+3] = 255
+                      }
+                  }
+                  ctx.putImageData(imdata, 0, 0)
+                  return canvas.toDataURL()
+              },
+          }
+      })
+      const messages = {
+          en: {
+              message: {
+                  intro: 'This page helps experimenting to understand Python list slicing.',
+                  inputExpr: 'Enter a list expression:',
+                  sliceExpr: 'Now, enter a slice expression:',
+              },
+              word: {
+                  input: 'Input',
+                  output: 'Output, after running {expr}',
+                  afterRunning: 'after running',
+                  indices: 'Indices',
+                  values: 'Values',
+                  negIndices: 'Negative Indices',
+              },
+          },
+          fr: {
+              message: {
+                  intro: 'Cette page aide à experimenter pour comprendre les "tranches" de liste en Python.',
+                  inputExpr: 'Entrez une expression de liste :',
+                  sliceExpr: 'Maintenant, entrez une expression de tranche :',
+              },
+              word: {
+                  input: 'Entrée',
+                  output: "Sortie",
+                  afterRunning: "après l'execution de",
+                  indices: 'Indices',
+                  values: 'Valeurs',
+                  negIndices: 'Indices Négatifs',
+              },
+          }
+      }
+      let loc = navigator.language || navigator.userLanguage
+      app.use(VueI18n.createI18n({
+          locale: loc,
+          fallbackLocale: 'en',
+          messages
+      }))
+      app.mount('#main')
+  </script>
+</body>
+</html>
