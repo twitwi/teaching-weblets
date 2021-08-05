@@ -15,17 +15,44 @@
           overflow: hidden;
       }
       .offscreen {
+          /**/
           display: none;
-          /*border: 1px solid red;*/
+          /*/
+          width: 100px;
+          border: 1px solid red;
+          /**/
       }
       .controls {
+          padding: 1em;
+          background: white;
           position: absolute;
+          border-radius: 1em;
           top: 0;
           left: 0;
-          width: 40%;
+          width: 30%;
+          opacity: 0.35;
+      }
+      .controls:hover {
+          opacity: 1;
       }
       .useless {
           color: grey;
+      }
+      .bg {
+          fill: black;
+      }
+      .crisp {
+          image-rendering: pixelated;
+          image-rendering: crisp-edges;
+      }
+      .describe {
+          display: block;
+          position: relative;
+          height: 0;
+          font-size: 50%;
+          font-family: sans-serif;
+          font-weight: bold;
+          color: darkgray;
       }
   </style>
 </head>
@@ -34,14 +61,24 @@
     <div id="main" >
 
         <div class="controls">
-            <div v-if="generalized">GDD({{α1.toFixed(2)}}, {{α2.toFixed(2)}}, {{b1.toFixed(2)}}, {{b2.toFixed(2)}})</div>
-            <div v-else>Dir({{α1.toFixed(2)}}, {{α2.toFixed(2)}}, {{α3.toFixed(2)}})</div>
+            <div v-if="generalized">GDD(<f2 n="α1"></f2>, <f2 n="α2"></f2>, <f2 n="b1"></f2>, <f2 n="b2"></f2>)</div>
+            <div v-else>Dir(<f2 n="α1"></f2>, <f2 n="α2"></f2>, <f2 n="α3"></f2>)</div>
+            <span class="describe">α1 (top)</span>
             <input type="range" min="0.5" max="10" step="0.01" v-model.number="α1"/>
+            <span class="describe">α2 (left)</span>
             <input type="range" min="0.5" max="10" step="0.01" v-model.number="α2"/>
+            <span class="describe">α3 (right)</span>
             <input type="range" min="0.5" max="10" step="0.01" v-model.number="α3" :disabled="generalized"/>
             <div>all together</div>
-            <input type="range" min="0.5" max="10" step="0.01" v-model.number="allαs"/>
+            <span class="describe">same range as above</span>
+            <input type="range" min="0.5" max="10" step="0.01" v-model.number="allαs" />
+            <span class="describe">small values</span>
+            <input type="range" min="0.5" max="1.5" step="0.01" v-model.number="allαs" />
+            <span class="describe">huge values (log scale)</span>
             <input type="range" :min="Math.log(0.5)" :max="Math.log(1001)" step=".1" v-model.number="logallαs"/>
+            <span class="describe">control magnitude</span>
+            <input type="range" min="0.5" max="100" step="0.01" v-model.number="normallαs" />
+            <!--
             <label>
                 <input type="checkbox" v-model="logView"/>
                 <span class="checkable">view logdensity</span>
@@ -50,7 +87,8 @@
                 <input type="checkbox" v-model="logCompute"/>
                 <span class="checkable">compute in log space</span>
             </label>
-            <div>Generalized?</div>
+            -->
+            <hr/>
             <label>
                 <input type="checkbox" v-model="generalized"/>
                 <span class="checkable">view generalized Dirichlet distribution</span>
@@ -59,7 +97,7 @@
             <input type="range" min="0.5" max="100" step="0.01" v-model.number="b2" :disabled="!generalized"/>
         </div>
         
-        <canvas ref="canvas" class="offscreen" :width="side" :height="side/800 * 692"></canvas> <!-- (3/4)**0.5 * 800 -->
+        <canvas ref="canvas" class="offscreen" :width="side" :height="side"></canvas>
         <svg viewBox="0 0 800 700">
             <defs>
                 <clipPath
@@ -67,12 +105,23 @@
                     id="triangleClip">
                     <path
                         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-                        d="M 0,692 800,692 400,0 Z"/>
+                        d="M 54,800 746,800 400,0 Z"/>
                 </clipPath>
             </defs>
-            <rect x="10" y="10" width="780" height="680" style="fill: white;"></rect>
+            <rect x="10" y="10" width="780" height="680" class="bg"></rect>
+
+            <!--
+            <rect x="100" y="100" width="100" height="100" style="fill: pink;"></rect>
+            <image :x="-50" :y="-50" :width="100" :height="100" opacity=".5" :transform="`translate(150, 150) scale(${side/(side-1)*.866},${side/(side-1)})`" class="crisp" :xlink:href="imgUrl"></image>
+                    <path transform="translate(100, 100) scale(.125, .125)"
+                        style="fill:none;stroke:#000000;stroke-width:1.264583px;stroke-opacity:1"
+                        d="M 54,800 746,800 400,0 Z" />
+                        -->
+
             <g transform="translate(400, 340) scale(0.75, 0.75) translate(-400, -340)">
-                <image ref="image" clip-path="url(#triangleClip)" width="800" height="692" :xlink:href="imgUrl"></image> <!-- (3/4)**0.5 * 800 -->
+                <g clip-path="url(#triangleClip)">
+                    <image ref="image" :transform="imgTransform" :x="-800/2" :y="-800/2" :width="800" :height="800" :xlink:href="imgUrl"></image> <!-- (3/4)**0.5 * 800 -->
+                </g>
             </g>
         </svg>
         {{ /*output*/ }}
@@ -81,19 +130,24 @@
 
 
   <script>
+      f2 = {
+          props: ['n'],
+          template: '<span @click="$parent.promptSetFloat(n)">{{$parent[n].toFixed(2)}}</span>'
+      }
       app = Vue.createApp({
           components: {
+              f2
           },
           data: () => ({
               mounted: false,
-              α1: 3.0,
-              α2: 3.0,
-              α3: 3.0,
+              α1: 2.0,
+              α2: 2.0,
+              α3: 1.0,
               allαs: 3.0,
-              generalized: true,
+              generalized: false,
               b1: 4.0,
               b2: 1.0,
-              side: 100,
+              side: 100+1,
               logView: false,
               logCompute: true,
               //imgUrl: 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.Pnj809C0kcPwECauNlpaHAHaGY%26pid%3DApi&f=1',
@@ -101,6 +155,7 @@
           mounted() {
               window.vm = this
               this.mounted = true
+              //window.setTimeout(() => { this.allαs = .75 ; this.generalized = false }, 200)
           },
           watch: {
               allαs(v) {
@@ -116,13 +171,42 @@
               slice_expr(v) {
               },*/
           },
+          methods: {
+            promptSetFloat(name) {
+                let v = window.prompt(name, this[name])
+                if (v !== null) {
+                    v = parseFloat(v)
+                    if (!isNaN(v)) {
+                        this[name] = v
+                    }
+                }
+            }
+          },
           computed:  {
+              imgTransform() {
+                  // already 0-centered using x and y
+                  // already 800x800 using width and height
+                  if (!this.mounted) return ""
+                  let side = this.side
+                  return `translate(400, 400) scale(${0.866 * side/(side-1)}, ${side/(side-1)})`
+              },
               logallαs: {
                   get() {
                       return Math.log(this.allαs)
                   },
                   set(v) {
                       this.allαs = Math.exp(v)
+                  },
+              },
+              normallαs: {
+                  get() {
+                      return this.α1 + this.α2 + this.α3
+                  },
+                  set(v) {
+                      let r = v / this.normallαs
+                      this.α1 *= r
+                      this.α2 *= r
+                      this.α3 *= r
                   },
               },
               imgUrl() {
@@ -137,68 +221,80 @@
                   }
                   //logSumExp3 = (u, v, w) => logSumExp(logSumExp(u, v), w)
                   */
-                  if (!this.mounted || this.$refs.canvas === undefined) return ""
+                  if (!this.mounted) return ""
                   const canvas = this.$refs.canvas
                   const ctx = canvas.getContext('2d')
-                  const w = canvas.width
-                  const h = canvas.height
+                  const w = this.side//canvas.width
+                  const h = this.side//canvas.height
+                  ctx.clearRect(0, 0, w, h);
                   const array = new Float32Array(w*h)
-                  let ε = 0// not necessary in the end
                   let min = 1/0
                   let max = -1/0
-                  for (let i = 0; i < h; i++) {
-                      let hs = 2+i/.866/2
-                      let p1 = 1 - (i+0.5)/h
-                      for (let j = parseInt(w/2 - hs+1); j < w/2 + hs; j++) {
-                          let ind = i*w + j
-                          let p3 = Math.max(0, (1 - p1) * (j-w/2+hs) / (2*hs))
-                          let p2 = 1 - p1 - p3
-                          let v = 0
-                          if (this.logCompute) {
-                              //v = Math.pow(p1, this.α1-1) * Math.pow(p2, this.α2-1) * Math.pow(p3, this.α3-1)
-                              if (this.generalized) {
-                                  v = Math.log(p1+ε)*(this.α1-1) + Math.log(p2+ε)*(this.α2-1) + Math.log(p3+ε)*(this.b2-1) + Math.log(p2+p3+ε)*(this.b1-(this.α2+this.b2))
+                  let doubleLoop = (f) => {
+                        for (let i = 0; i < h; i++) {
+                          let hs = parseInt((1 + i) / 2)
+                          let p1 = 1 - i / (h-1)
+                          let mid = (w - 1) / 2
+                          let start = mid - hs
+                          let end = mid + hs
+                          for (let j = start; j <= end; j++) {
+                              let ind = i * w + j
+                              let p2, p3
+                              // encourage nice border and corner views
+                              if (p1 == 1) {
+                                  p3 = p2 = 0
+                              } else if (j > mid) {
+                                  p2 = Math.min(1, Math.max(0, (1 - p1) * (end - j) / (2 * hs)))
+                                  p3 = 1 - p1 - p2
                               } else {
-                                  v = Math.log(p1+ε)*(this.α1-1) + Math.log(p2+ε)*(this.α2-1) + Math.log(p3+ε)*(this.α3-1)
+                                  p3 = Math.min(1, Math.max(0, (1 - p1) * (j - start) / (2 * hs)))
+                                  p2 = 1 - p1 - p3
                               }
-                          } else {
-                              if (this.generalized) {
-                                  v = Math.pow(p1, this.α1-1) * Math.pow(p2, this.α2-1) * Math.pow(p3, this.b2-1) * Math.pow(p2+p3, this.b1-(this.α2+this.b2))
-                              } else {
-                                  v = Math.pow(p1, this.α1-1) * Math.pow(p2, this.α2-1) * Math.pow(p3, this.α3-1)
-                              }
+                              f(ind, {i,j,hs,p1,p2,p3})
                           }
-                          array[ind] = v
-                          max = Math.max(max, v)
-                          min = Math.min(min, v)
                       }
                   }
-                  console.log(min, max)
-                  if (this.logCompute && !this.logView) {
-                      for (let i = 0; i < h; i++) {
-                          let hs = 2+i/.866/2
-                          for (let j = parseInt(w/2 - hs+1); j < w/2 + hs; j++) {
-                              let ind = i*w + j
-                              array[ind] = Math.exp(array[ind] - max)
+                  // TODO 4 double loops (test for perf)
+                  doubleLoop( (ind, {p1, p2, p3}) => {
+                      let v = 0
+                      if (this.logCompute) {
+                          let ε = 0.000001
+                          //v = Math.pow(p1, this.α1-1) * Math.pow(p2, this.α2-1) * Math.pow(p3, this.α3-1)
+                          if (this.generalized) {
+                              v = Math.log(p1 + ε) * (this.α1 - 1) + Math.log(p2 + ε) * (this.α2 - 1) + Math.log(p3 + ε) * (this.b2 - 1) + Math.log(p2 + p3 + ε) * (this.b1 - (this.α2 + this.b2))
+                          } else {
+                              v = Math.log(p1 + ε) * (this.α1 - 1) + Math.log(p2 + ε) * (this.α2 - 1) + Math.log(p3 + ε) * (this.α3 - 1)
+                          }
+                      } else {
+                          if (this.generalized) {
+                              v = Math.pow(p1, this.α1 - 1) * Math.pow(p2, this.α2 - 1) * Math.pow(p3, this.b2 - 1) * Math.pow(p2 + p3, this.b1 - (this.α2 + this.b2))
+                          } else {
+                              v = Math.pow(p1, this.α1 - 1) * Math.pow(p2, this.α2 - 1) * Math.pow(p3, this.α3 - 1)
                           }
                       }
+                      array[ind] = v
+                      max = Math.max(max, v)
+                      min = Math.min(min, v)
+                  })
+                  console.log(min, max)
+                  if (this.logCompute && !this.logView) {
+                      doubleLoop( ind => {
+                          array[ind] = Math.exp(array[ind] - max)
+                      })
                       min = 0
                       max = 1
                       console.log(min, max, "after")
                   }
+                  // TODO fix or remove
                   if (this.logView) {
                       if (!this.logCompute) {
                           let logadd = 1
                           let logmul = 1
                           let logorigin = max/6
-                          for (let i = 0; i < h; i++) {
-                              let hs = 2+i/.866/2
-                              for (let j = parseInt(w/2 - hs+1); j < w/2 + hs; j++) {
-                                  let ind = i*w + j
-                                  let v = array[ind]
-                                  array[ind] = Math.log(logadd + logmul*Math.max(0, v-logorigin)/(max-logorigin))
-                              }
-                          }
+                          doubleLoop( ind => {
+                              let v = array[ind]
+                              array[ind] = Math.log(logadd + logmul * Math.max(0, v - logorigin) / (max - logorigin))
+                          })
                           min = Math.log(logadd)
                           max = Math.log(logadd+logmul)
                       } else {
@@ -211,20 +307,16 @@
                   //let ctx = this.$refs.canvas.getContext('2d')
                   //ctx.fillStyle = 'green'
                   //ctx.fillRect(10, 10, 800, 500)
-                  for (let i = 0; i < h; i++) {
-                      let hs = 1+i/.866/2
-                      for (let j = parseInt(w/2 - hs); j < w/2 + hs; j++) {
-                          let ind = i*w + j
-                          let v = (array[ind]-min)/(max-min) * 255
-                          //v = Math.sqrt(v/255)*255
-                          v = Math.pow(v/255,2)*255
-                          ind *= 4
-                          data[ind+0] = parseInt(v)
-                          data[ind+1] = parseInt(v)
-                          data[ind+2] = 0
-                          data[ind+3] = 255
-                      }
-                  }
+                  doubleLoop( ind => {
+                      let v = (array[ind] - min) / (max - min) * 255
+                      v = Math.pow(v / 255, 1) * 255
+                      ind *= 4
+                      data[ind + 0] = parseInt(v)
+                      data[ind + 1] = parseInt(v)
+                      data[ind + 2] = parseInt(128-v/4)
+                      data[ind + 3] = 255
+
+                  })
                   ctx.putImageData(imdata, 0, 0)
                   return canvas.toDataURL()
               },
