@@ -15,7 +15,7 @@
         - [l_2,p norm in 3D](http://twitwi.github.io/teaching-weblets/norms/norms-3d.html) (not-fully interactive)
     - [beta hinge loss](http://twitwi.github.io/teaching-weblets/beta-hinge-loss/beta-hinge-loss.html) from the following paper http://vzantedeschi.com/betarisk.html
     - [Counting neural network parameters, field of view etc](http://twitwi.github.io/teaching-weblets/nn-params/nn-params.html)
-    - [A 2D convolution](http://twitwi.github.io/teaching-weblets/convolution/index.html) (move your mouse, possibly click or hold shift) (NB: need a heavy file that can be generated using a script given in the repo)
+    - [A 2D convolution](http://twitwi.github.io/teaching-weblets/convolution-cat/index.html) (move your mouse, possibly click or hold shift) (NB: the version in convolution/ needs a heavy file that can be generated using a script given in the repo)
     - [NN3D](http://twitwi.github.io/teaching-weblets/nn-3d-steps/nn-3d-one-step.html) an MLP in a 2D space with 2 hidden neurons (and a [simple projection](http://twitwi.github.io/teaching-weblets/nn-3d-steps/nn-3d-proj2d.html))
     - Visualisation around the CONE algorithm
         - [CONE2](http://twitwi.github.io/teaching-weblets/cones/massive-cones_v2.html)
